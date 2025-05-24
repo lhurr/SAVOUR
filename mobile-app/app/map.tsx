@@ -39,10 +39,11 @@ export default function MapScreen() {
         import('leaflet'),
       ]).then(([{ MapContainer, TileLayer, Marker, Popup }, L]) => {
         delete (L.Icon.Default.prototype as any)._getIconUrl;
-        L.Icon.Default.mergeOptions({
-          iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-          iconUrl: require('leaflet/dist/images/marker-icon.png'),
-          shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+        const redDotIcon = new L.Icon({
+          iconUrl: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+          iconSize: [32, 32],
+          iconAnchor: [16, 32],
+          popupAnchor: [0, -32],
         });
 
         const WebMap = () => (
@@ -52,7 +53,7 @@ export default function MapScreen() {
               attribution='&copy; OpenStreetMap contributors'
             />
             {places.map((place) => (
-              <Marker key={place.id} position={[place.lat, place.lon]}>
+              <Marker key={place.id} position={[place.lat, place.lon]} icon={redDotIcon}>
                 <Popup>{place.name}</Popup>
               </Marker>
             ))}
@@ -125,6 +126,7 @@ export default function MapScreen() {
               longitude: place.lon,
             }}
             title={place.name}
+            pinColor="red"
           />
         ))}
       </MapView>
