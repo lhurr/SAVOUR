@@ -1,3 +1,4 @@
+import 'leaflet/dist/leaflet.css';
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { useColorScheme } from 'react-native';

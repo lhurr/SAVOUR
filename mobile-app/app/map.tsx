@@ -1,19 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, ActivityIndicator, Alert, Platform } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, Alert, Platform, Text } from 'react-native';
 import * as Location from 'expo-location';
-
-import MapView, { Marker } from 'react-native-maps';
-
-import { MapContainer, TileLayer, Marker as LeafletMarker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-  iconUrl: require('leaflet/dist/images/marker-icon.png'),
-  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
-});
 
 interface Place {
   id: string;
@@ -26,6 +13,8 @@ export default function MapScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [places, setPlaces] = useState<Place[]>([]);
   const [loading, setLoading] = useState(true);
+  const [MapComponent, setMapComponent] = useState<React.ComponentType | null>(null);
+  const [mapLoading, setMapLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -43,8 +32,43 @@ export default function MapScreen() {
     })();
   }, []);
 
+  useEffect(() => {
+    if (Platform.OS === 'web' && location) {
+      Promise.all([
+        import('react-leaflet'),
+        import('leaflet'),
+      ]).then(([{ MapContainer, TileLayer, Marker, Popup }, L]) => {
+        delete (L.Icon.Default.prototype as any)._getIconUrl;
+        L.Icon.Default.mergeOptions({
+          iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+          iconUrl: require('leaflet/dist/images/marker-icon.png'),
+          shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+        });
+
+        const WebMap = () => (
+          <MapContainer center={[location.coords.latitude, location.coords.longitude]} zoom={15} style={{ height: '100%', width: '100%' }}>
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; OpenStreetMap contributors'
+            />
+            {places.map((place) => (
+              <Marker key={place.id} position={[place.lat, place.lon]}>
+                <Popup>{place.name}</Popup>
+              </Marker>
+            ))}
+          </MapContainer>
+        );
+        setMapComponent(() => WebMap);
+        setMapLoading(false);
+      }).catch(() => {
+        Alert.alert('Error', 'Failed to load map component.');
+        setMapLoading(false);
+      });
+    }
+  }, [location, places]);
+
   const fetchNearbyPlaces = async (latitude: number, longitude: number) => {
-    const radius = 3000;
+    const radius = 2000;
     const query = `[out:json];(node["amenity"~"restaurant|cafe|fast_food|bar|pub"](around:${radius},${latitude},${longitude}););out;`;
     const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
 
@@ -59,17 +83,57 @@ export default function MapScreen() {
       }));
       setPlaces(fetchedPlaces);
     } catch (error) {
-      Alert.alert('eror', 'failll');
+      Alert.alert('Error', 'Failed to fetch places.');
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading || !location) {
-    return (<View style={styles.loader}><ActivityIndicator size="large" /></View>);
+  if (loading || !location || (Platform.OS === 'web' && mapLoading)) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" />
+        <Text>Loading map...</Text>
+      </View>
+    );
   }
 
-  return (<View style={styles.container}>{Platform.OS === 'web' ? (<MapContainer center={[location.coords.latitude, location.coords.longitude]} zoom={15} style={{ height: '100%', width: '100%' }}><TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; OpenStreetMap'/>{places.map((place) => (<LeafletMarker key={place.id} position={[place.lat, place.lon]}><Popup>{place.name}</Popup></LeafletMarker>))}</MapContainer>) : (<MapView style={styles.map} initialRegion={{latitude: location.coords.latitude,longitude: location.coords.longitude,latitudeDelta: 0.03,longitudeDelta: 0.03,}} showsUserLocation={true}>{places.map((place) => (<Marker key={place.id} coordinate={{latitude: place.lat,longitude: place.lon,}} title={place.name}/>))}</MapView>)}</View>);
+  if (Platform.OS === 'web') {
+    return MapComponent ? <MapComponent /> : <Text>Failed to load map.</Text>;
+  }
+
+  const MapView = require('react-native-maps').default;
+  const { Marker } = require('react-native-maps');
+
+  return (
+    <View style={styles.container}>
+      <MapView
+        style={styles.map}
+        initialRegion={{
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.03,
+          longitudeDelta: 0.03,
+        }}
+        showsUserLocation={true}
+      >
+        {places.map((place) => (
+          <Marker
+            key={place.id}
+            coordinate={{
+              latitude: place.lat,
+              longitude: place.lon,
+            }}
+            title={place.name}
+          />
+        ))}
+      </MapView>
+    </View>
+  );
 }
 
-const styles = StyleSheet.create({container:{flex:1},map:{flex:1},loader:{flex:1,justifyContent:'center',alignItems:'center'}});
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  map: { flex: 1 },
+  loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+});
