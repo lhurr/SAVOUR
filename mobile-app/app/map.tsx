@@ -13,6 +13,8 @@ interface Place {
   website?: string;
 }
 
+
+// https://github.com/react-native-maps/react-native-maps
 export default function MapScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [places, setPlaces] = useState<Place[]>([]);
