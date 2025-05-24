@@ -1,53 +1,44 @@
-// app/_layout.tsx
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
-import { Slot, useRouter, useSegments } from 'expo-router';
-import { Session } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
+import { Tabs } from 'expo-router';
+import React from 'react';
+import { useColorScheme } from 'react-native';
 
-export default function Layout() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-  const segments = useSegments();
-  const router = useRouter();
+import { Colors } from '../constants/Colors';
+import { IconSymbol } from '../components/ui/IconSymbol';
 
-  // Check auth session on mount
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
+export default function TabLayout() {
+  const colorScheme = useColorScheme();
 
-    // Listen for session changes
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => {
-      authListener?.subscription.unsubscribe();
-    };
-  }, []);
-
-  // Redirect based on session
-  useEffect(() => {
-    if (!loading) {
-      const inAuthGroup = segments[0] === 'login' || segments[0] === 'signup';
-
-      if (!session && !inAuthGroup) {
-        router.replace('/login');
-      } else if (session && inAuthGroup) {
-        router.replace('/');
-      }
-    }
-  }, [session, loading, segments]);
-
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
-  return <Slot />;
+  return (
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+      }}>
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ color }) => <IconSymbol name="house.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="map"
+        options={{
+          title: 'Map',
+          tabBarIcon: ({ color }) => <IconSymbol name="paperplane.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="login"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="signup"
+        options={{
+          href: null,
+        }}
+      />
+    </Tabs>
+  );
 }
