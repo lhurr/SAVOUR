@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, ActivityIndicator, Alert, Platform, Text } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, Alert, Platform, Text, Linking } from 'react-native';
 import * as Location from 'expo-location';
 
 interface Place {
@@ -7,6 +7,7 @@ interface Place {
   name: string;
   lat: number;
   lon: number;
+  link: string;
 }
 
 export default function MapScreen() {
@@ -54,7 +55,12 @@ export default function MapScreen() {
             />
             {places.map((place) => (
               <Marker key={place.id} position={[place.lat, place.lon]} icon={redDotIcon}>
-                <Popup>{place.name}</Popup>
+                <Popup>
+                  <div>
+                    <strong>{place.name}</strong><br />
+                    <a href={place.link} target="_blank" rel="noopener noreferrer">Source Link</a>
+                  </div>
+                </Popup>
               </Marker>
             ))}
           </MapContainer>
@@ -81,6 +87,7 @@ export default function MapScreen() {
         name: el.tags.name || 'Unnamed',
         lat: el.lat,
         lon: el.lon,
+        link: url,
       }));
       setPlaces(fetchedPlaces);
     } catch (error) {
@@ -104,7 +111,7 @@ export default function MapScreen() {
   }
 
   const MapView = require('react-native-maps').default;
-  const { Marker } = require('react-native-maps');
+  const { Marker, Callout } = require('react-native-maps');
 
   return (
     <View style={styles.container}>
@@ -125,9 +132,15 @@ export default function MapScreen() {
               latitude: place.lat,
               longitude: place.lon,
             }}
-            title={place.name}
             pinColor="red"
-          />
+          >
+            <Callout onPress={() => Linking.openURL(place.link)}>
+              <View>
+                <Text style={{ fontWeight: 'bold' }}>{place.name}</Text>
+                <Text style={{ color: 'blue' }}>Tap to view source</Text>
+              </View>
+            </Callout>
+          </Marker>
         ))}
       </MapView>
     </View>
