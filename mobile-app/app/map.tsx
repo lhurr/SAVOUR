@@ -8,6 +8,9 @@ interface Place {
   lat: number;
   lon: number;
   link: string;
+  cuisine?: string;
+  address?: string;
+  website?: string;
 }
 
 export default function MapScreen() {
@@ -58,6 +61,9 @@ export default function MapScreen() {
                 <Popup>
                   <div>
                     <strong>{place.name}</strong><br />
+                    {place.cuisine && <span>Cuisine: {place.cuisine}<br /></span>}
+                    {place.address && <span>Address: {place.address}<br /></span>}
+                    {place.website && <a href={place.website} target="_blank" rel="noopener noreferrer">Website</a>}<br />
                     <a href={place.link} target="_blank" rel="noopener noreferrer">Source Link</a>
                   </div>
                 </Popup>
@@ -88,6 +94,9 @@ export default function MapScreen() {
         lat: el.lat,
         lon: el.lon,
         link: url,
+        cuisine: el.tags.cuisine,
+        address: el.tags['addr:street'] ? `${el.tags['addr:housenumber'] || ''} ${el.tags['addr:street']}`.trim() : undefined,
+        website: el.tags.website,
       }));
       setPlaces(fetchedPlaces);
     } catch (error) {
@@ -137,6 +146,9 @@ export default function MapScreen() {
             <Callout onPress={() => Linking.openURL(place.link)}>
               <View>
                 <Text style={{ fontWeight: 'bold' }}>{place.name}</Text>
+                {place.cuisine && <Text>Cuisine: {place.cuisine}</Text>}
+                {place.address && <Text>Address: {place.address}</Text>}
+                {place.website && <Text style={{ color: 'blue' }} onPress={() => place.website && Linking.openURL(place.website)}>Website</Text>}
                 <Text style={{ color: 'blue' }}>Tap to view source</Text>
               </View>
             </Callout>
