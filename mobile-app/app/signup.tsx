@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { supabase } from '../lib/supabase';
+import { View, TextInput, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Button } from '../components/ui/Button';
+import { Text } from '../components/ui/Typography';
+import { colors, spacing, typography, borderRadius, mixins } from '../constants/theme';
+import { supabase } from '../lib/supabase';
 
 export default function SignupScreen() {
   const [email, setEmail] = useState('');
@@ -10,29 +13,34 @@ export default function SignupScreen() {
   const router = useRouter();
 
   async function handleSignup() {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    if (error) {
-      setErrorMsg(error.message);
-    } else {
-      setErrorMsg('');
-      alert('Signup successful, check your email to confirm.');
-      router.push('/login');
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (error) {
+        setErrorMsg(error.message);
+      } else {
+        setErrorMsg('');
+        alert('Signup successful! Please check your email to confirm your account.');
+        router.push('/login');
+      }
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : 'An error occurred');
     }
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[mixins.container, styles.container]}>
       <View style={styles.titleContainer}>
-        <Text style={styles.tagline}>Find your next go-to grub with</Text>
-        <Text style={styles.logoText}>SAVOUR</Text>
+        <Text variant="h3" center style={styles.tagline}>Find your next go-to grub with</Text>
+        <Text variant="h1" color={colors.primary} style={styles.logoText}>SAVOUR</Text>
       </View>
       <View style={styles.formContainer}>
         <TextInput
           placeholder="Email"
-          placeholderTextColor="#888"
+          placeholderTextColor={colors.text.secondary.dark}
           style={styles.input}
           onChangeText={setEmail}
           value={email}
@@ -41,24 +49,33 @@ export default function SignupScreen() {
         />
         <TextInput
           placeholder="Password"
-          placeholderTextColor="#888"
+          placeholderTextColor={colors.text.secondary.dark}
           style={styles.input}
           onChangeText={setPassword}
           value={password}
           secureTextEntry
         />
-        {!!errorMsg && <Text style={styles.error}>{errorMsg}</Text>}
+        {!!errorMsg && (
+          <Text variant="caption" color={colors.error} center style={styles.error}>
+            {errorMsg}
+          </Text>
+        )}
         
         <View style={styles.buttonContainer}>
-          <TouchableOpacity 
-            style={[styles.button, styles.secondaryButton]} 
+          <Button
+            title="Log In"
             onPress={() => router.push('/login')}
-          >
-            <Text style={[styles.buttonText, styles.secondaryButtonText]}>Log In</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={handleSignup}>
-            <Text style={styles.buttonText}>Sign Up</Text>
-          </TouchableOpacity>
+            variant="outline"
+            size="large"
+            style={styles.button}
+          />
+          <Button
+            title="Sign Up"
+            onPress={handleSignup}
+            variant="primary"
+            size="large"
+            style={styles.button}
+          />
         </View>
       </View>
     </View>
@@ -67,30 +84,25 @@ export default function SignupScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    backgroundColor: colors.background.dark,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#343541',
   },
   titleContainer: {
     alignItems: 'center',
-    marginBottom: 60,
-  },
-  logoText: {
-    fontSize: 64,
-    fontWeight: 'bold',
-    color: '#19C37D',
-    letterSpacing: 4,
-    marginTop: 8,
-    textShadowColor: '#0F7A4D',
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 0,
+    marginBottom: spacing.lg,
   },
   tagline: {
-    fontSize: 20,
-    color: '#FFFFFF',
-    fontWeight: '500',
+    fontSize: typography.sizes.xl,
+    marginBottom: spacing.xs,
+  },
+  logoText: {
+    fontSize: typography.sizes.xxxl * 1.5,
+    marginTop: 0,
+    textShadowColor: colors.primaryDark,
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 0,
+    letterSpacing: 2,
   },
   formContainer: {
     width: '100%',
@@ -98,45 +110,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#444654',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 15,
-    backgroundColor: '#202123',
-    color: '#FFFFFF',
     width: '80%',
+    borderWidth: 1,
+    borderColor: colors.border.dark,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+    backgroundColor: colors.surface.dark,
+    color: colors.text.primary.dark,
+    fontSize: typography.sizes.md,
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 10,
-    marginTop: 10,
+    gap: spacing.sm,
     width: '80%',
+    marginTop: spacing.xs,
   },
   button: {
-    backgroundColor: '#19C37D',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
     flex: 1,
   },
-  secondaryButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: '#19C37D',
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  secondaryButtonText: {
-    color: '#19C37D',
-  },
-  error: { 
-    color: '#FF4444',
-    marginBottom: 12,
-    textAlign: 'center',
+  error: {
+    marginBottom: spacing.md,
   },
 });

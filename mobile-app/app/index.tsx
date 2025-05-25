@@ -1,13 +1,15 @@
 // app/index.tsx
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '../components/ui/Typography';
+import { colors, spacing } from '../constants/theme';
 
 export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.contentContainer}>
-        <Text style={styles.title}>Welcome, User!</Text>
-        <Text style={styles.title}>Ready to SAVOUR?</Text>
+        <Text variant="h2" color={colors.text.primary.dark} center>Hello!</Text>
+        <Text variant="h2" color={colors.text.primary.dark} center>Ready to feast?</Text>
       </View>
     </View>
   );
@@ -17,17 +19,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: '100%',
-    backgroundColor: '#343541',
+    backgroundColor: colors.background.dark,
   },
   contentContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  title: { 
-    fontSize: 24, 
-    marginBottom: 20,
-    color: '#FFFFFF',
+    gap: spacing.md,
   },
 });
 
