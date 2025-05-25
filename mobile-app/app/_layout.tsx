@@ -55,6 +55,11 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '500',
+          marginTop: 0,
+        },
+        tabBarShowLabel: true,
+        tabBarIconStyle: {
+          marginBottom: -4,
         },
         headerRight: () => (
           ['login', 'signup'].includes(route.name) ? null : (
