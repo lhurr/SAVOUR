@@ -1,30 +1,33 @@
 // app/index.tsx
 import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
-import { supabase } from '../lib/supabase';
-import { useRouter } from 'expo-router';
+import { View, Text, StyleSheet } from 'react-native';
 
 export default function HomeScreen() {
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      alert('Error logging out: ' + error.message);
-    } else {
-      router.replace('/login');
-    }
-  };
-
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome!</Text>
-      <Button title="Logout" onPress={handleLogout} />
+      <View style={styles.contentContainer}>
+        <Text style={styles.title}>Welcome, User!</Text>
+        <Text style={styles.title}>Ready to SAVOUR?</Text>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  title: { fontSize: 24, marginBottom: 20 },
+  container: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: '#343541',
+  },
+  contentContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: { 
+    fontSize: 24, 
+    marginBottom: 20,
+    color: '#FFFFFF',
+  },
 });
+
