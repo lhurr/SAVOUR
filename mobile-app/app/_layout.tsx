@@ -12,9 +12,9 @@ const CustomHeader = () => (
   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
     <Text style={{ 
       color: '#19C37D',
-      fontSize: 24,
+      fontSize: 36,
       fontWeight: 'bold',
-      letterSpacing: 2,
+      letterSpacing: 3,
     }}>
       SAVOUR
     </Text>
@@ -73,19 +73,26 @@ export default function TabLayout() {
           )
         ),
         headerShown: !['login', 'signup'].includes(route.name),
-        headerTitle: () => ['index', 'map'].includes(route.name) ? <CustomHeader /> : null,
+        headerTitle: () => ['index', 'chat', 'map'].includes(route.name) ? <CustomHeader /> : null,
       })}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: 'HOME',
           tabBarIcon: ({ color }) => <IconSymbol name="house.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="chat"
+        options={{
+          title: 'CHAT',
+          tabBarIcon: ({ color }) => <IconSymbol name="message.fill" color={color} />,
         }}
       />
       <Tabs.Screen
         name="map"
         options={{
-          title: 'Map',
+          title: 'MAP',
           tabBarIcon: ({ color }) => <IconSymbol name="paperplane.fill" color={color} />,
         }}
       />
