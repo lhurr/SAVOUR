@@ -39,7 +39,7 @@ export default function MapScreen() {
   }, []);
 
   useEffect(() => {
-    if (Platform.OS === 'web' && location) {
+    if ((Platform.OS === 'web' || Platform.OS === 'ios') && location) {
       Promise.all([
         import('react-leaflet'),
         import('leaflet'),
@@ -56,7 +56,7 @@ export default function MapScreen() {
           <MapContainer center={[location.coords.latitude, location.coords.longitude]} zoom={15} style={{ height: '100%', width: '100%' }}>
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; OpenStreetMap contributors'
+              // attribution='&copy; OpenStreetMap contributors'
             />
             {places.map((place) => (
               <Marker key={place.id} position={[place.lat, place.lon]} icon={redDotIcon}>
@@ -108,7 +108,7 @@ export default function MapScreen() {
     }
   };
 
-  if (loading || !location || (Platform.OS === 'web' && mapLoading)) {
+  if (loading || !location || ((Platform.OS === 'web' || Platform.OS === 'ios') && mapLoading)) {
     return (
       <View style={styles.loader}>
         <ActivityIndicator size="large" />
