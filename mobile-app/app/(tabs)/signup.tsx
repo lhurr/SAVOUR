@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Button } from '../components/ui/Button';
-import { Text } from '../components/ui/Typography';
-import { colors, spacing, typography, borderRadius, mixins } from '../constants/theme';
-import { supabase } from '../lib/supabase';
+import { Button } from '../../components/ui/Button';
+import { Text } from '../../components/ui/Typography';
+import { colors, spacing, typography, borderRadius, mixins } from '../../constants/theme';
+import { supabase } from '../../lib/supabase';
 
 export default function SignupScreen() {
   const [email, setEmail] = useState('');

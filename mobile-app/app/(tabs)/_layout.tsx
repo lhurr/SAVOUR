@@ -3,10 +3,10 @@ import { Tabs } from 'expo-router';
 import React, { useEffect } from 'react';
 import { useColorScheme, TouchableOpacity, Text, View } from 'react-native';
 import { useRouter, useSegments } from 'expo-router';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../../lib/supabase';
 
-import { Colors } from '../constants/Colors';
-import { IconSymbol } from '../components/ui/IconSymbol';
+import { Colors } from '../../constants/Colors';
+import { IconSymbol } from '../../components/ui/IconSymbol';
 
 const CustomHeader = () => (
   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
