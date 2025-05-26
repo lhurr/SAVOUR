@@ -8,8 +8,8 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.contentContainer}>
-        <Text variant="h2" color={colors.text.primary.dark} center>Hello!</Text>
-        <Text variant="h2" color={colors.text.primary.dark} center>Ready to feast?</Text>
+        <Text variant="h2" color={colors.text.primary.dark} center>Hello there.</Text>
+        <Text variant="h2" color={colors.text.primary.dark} center>Welcome to SAVOUR, ready to feast?</Text>
       </View>
     </View>
   );

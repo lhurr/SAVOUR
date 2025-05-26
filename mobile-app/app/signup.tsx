@@ -23,7 +23,7 @@ export default function SignupScreen() {
         setErrorMsg(error.message);
       } else {
         setErrorMsg('');
-        alert('Signup successful! Please check your email to confirm your account.');
+        alert('Please check your email to confirm your account.');
         router.push('/login');
       }
     } catch (err) {
