@@ -116,7 +116,7 @@ export default function TabLayout() {
           )
         ),
         headerShown: !['login', 'signup'].includes(route.name),
-        headerTitle: () => ['index', 'chat', 'map'].includes(route.name) ? <CustomHeader /> : null,
+        headerTitle: () => ['index', 'chat', 'map', 'profile'].includes(route.name) ? <CustomHeader /> : null,
       })}>
       <Tabs.Screen
         name="index"
@@ -138,7 +138,13 @@ export default function TabLayout() {
           title: 'MAP',
           tabBarIcon: ({ color }) => <IconSymbol name="paperplane.fill" color={color} />,
         }}
-      />
+      /><Tabs.Screen
+      name="profile"
+      options={{
+        title: 'PROFILE',
+        tabBarIcon: ({ color }) => <IconSymbol name="person.crop.circle.fill" color={color} />,
+      }}
+    />
       <Tabs.Screen
         name="login"
         options={{
