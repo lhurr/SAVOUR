@@ -54,7 +54,7 @@ Follow these steps to set up SAVOUR on your local machine:
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/your-username/SAVOUR.git
+   git clone https://github.com/lhurr/SAVOUR.git
    cd SAVOUR
    ```
 
@@ -68,7 +68,7 @@ Follow these steps to set up SAVOUR on your local machine:
    ```bash
    cp .env.example .env
    ```
-   - Open the `.env` file and fill in your API keys 
+   - Open the `.env` file and fill in the Supabase API keys 
 
 4. **Navigate to Mobile App Directory**
    ```bash
@@ -91,3 +91,4 @@ Follow these steps to set up SAVOUR on your local machine:
    - Press `w` to open in web browser
 
 > Note: Make sure you have Node.js, npm, and Expo CLI installed on your system before starting.
+> Thank you for trying out SAVOUR, we appreciate any and all feedback!
