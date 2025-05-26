@@ -1,8 +1,8 @@
 import 'leaflet/dist/leaflet.css';
 import { Tabs } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useColorScheme, TouchableOpacity, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useSegments } from 'expo-router';
 import { supabase } from '../lib/supabase';
 
 import { Colors } from '../constants/Colors';
@@ -21,9 +21,47 @@ const CustomHeader = () => (
   </View>
 );
 
+// Authentication state check to handle existing logged in users / new users
+const useProtectedRoute = () => {
+  const segments = useSegments();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const isAuthRoute = ['login', 'signup'].includes(segments[0] || '');
+
+        if (!session && !isAuthRoute) {
+          // If no session and not on auth route, redirect to login
+          router.replace('/login');
+        } else if (session && isAuthRoute) {
+          // If has session and on auth route, redirect to home
+          router.replace('/');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, [segments]);
+
+  return isLoading;
+};
+
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
+  
+  // Use the protected route hook and get loading state
+  const isLoading = useProtectedRoute();
+
+  // Don't render anything while checking user authentication
+  if (isLoading) {
+    return null;
+  }
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();

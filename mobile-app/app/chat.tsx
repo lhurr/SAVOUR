@@ -10,7 +10,7 @@ export default function ChatScreen() {
   // Placeholder function for sending messages
   const handleSendMessage = () => {
     if (!message.trim()) return;
-    // Will implement message sending logic in future milestone
+    // Will implement message sending logic in milestone 2
     setMessage('');
   };
 
@@ -19,12 +19,12 @@ export default function ChatScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      {/* Messages Area */}
+      {/* Messages Area (MS2) */}
       <ScrollView 
         style={styles.messagesContainer}
         contentContainerStyle={styles.messagesContent}
       >
-        {/* Placeholder welcome message */}
+        {/* Placeholder welcome message (MS2) */}
         <View style={styles.messageWrapper}>
           <View style={[styles.message, styles.botMessage]}>
             <Text variant="body">
@@ -34,11 +34,11 @@ export default function ChatScreen() {
         </View>
       </ScrollView>
 
-      {/* Message Input Area */}
+      {/* Message Input Area (MS2) */}
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Type your message..."
+          placeholder=" Type your message..."
           placeholderTextColor={colors.text.secondary.dark}
           value={message}
           onChangeText={setMessage}
@@ -103,6 +103,5 @@ const styles = StyleSheet.create({
     minHeight: 40,
   },
   sendButton: {
-    // Remove alignSelf as it's no longer needed with container alignment
   },
 }); 
