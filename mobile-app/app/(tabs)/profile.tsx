@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, ActivityIndicator } from 'react-native';
-import { Text } from '../components/ui/Typography'; 
-import { supabase } from '../lib/supabase';
-import { colors, spacing } from '../constants/theme'; 
+import { Text } from '../../components/ui/Typography'; 
+import { supabase } from '../../lib/supabase';
+import { colors, spacing } from '../../constants/theme'; 
 
 export default function Profile() {
   const [email, setEmail] = useState<string | null>(null);

@@ -14,7 +14,7 @@ interface Place {
 }
 
 
-// https://github.com/react-native-maps/react-native-maps
+// https://github.com/react-native-maps/react-native-maps, RENDEER using leaflet
 export default function MapScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [places, setPlaces] = useState<Place[]>([]);
