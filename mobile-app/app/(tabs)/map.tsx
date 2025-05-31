@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, ActivityIndicator, Alert, Platform, Text, Linking } from 'react-native';
 import * as Location from 'expo-location';
+import MapView, { Marker, Callout } from 'react-native-maps';
 
 interface Place {
   id: string;
@@ -102,7 +103,7 @@ export default function MapScreen() {
       }));
       setPlaces(fetchedPlaces);
     } catch (error) {
-      Alert.alert('Error', 'Failed to fetch places.');
+      Alert.alert('Error', error as string);
     } finally {
       setLoading(false);
     }
@@ -120,9 +121,6 @@ export default function MapScreen() {
   if (Platform.OS === 'web') {
     return MapComponent ? <MapComponent /> : <Text>Failed to load map.</Text>;
   }
-
-  const MapView = require('react-native-maps').default;
-  const { Marker, Callout } = require('react-native-maps');
 
   return (
     <View style={styles.container}>
