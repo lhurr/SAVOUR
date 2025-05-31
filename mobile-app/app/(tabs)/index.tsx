@@ -1,8 +1,8 @@
 // app/index.tsx
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Text } from '../components/ui/Typography';
-import { colors, spacing } from '../constants/theme';
+import { Text } from '../../components/ui/Typography';
+import { colors, spacing } from '../../constants/theme';
 
 export default function HomeScreen() {
   return (

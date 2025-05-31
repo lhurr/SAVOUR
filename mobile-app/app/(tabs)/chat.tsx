@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { Button } from '../components/ui/Button';
-import { Text } from '../components/ui/Typography';
-import { colors, spacing, typography, borderRadius, mixins } from '../constants/theme';
+import { Button } from '../../components/ui/Button';
+import { Text } from '../../components/ui/Typography';
+import { colors, spacing, typography, borderRadius, mixins } from '../../constants/theme';
 
 export default function ChatScreen() {
   const [message, setMessage] = useState('');
