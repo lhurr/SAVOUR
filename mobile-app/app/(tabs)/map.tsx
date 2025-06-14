@@ -123,10 +123,10 @@ export default function MapScreen() {
     }
   };
 
-  const handleInfoPress = (placeName: string) => {
+  const handleInfoPress = (placeName: string, lat: number, lon: number) => {
     router.push({
       pathname: '/restaurant-info',
-      params: { name: placeName }
+      params: { name: placeName, lat: lat.toString(), lon: lon.toString() }
     });
   };
 
@@ -177,8 +177,8 @@ export default function MapScreen() {
                 <Text style={styles.link} onPress={() => Linking.openURL(place.link)}>
                   Source Link
                 </Text>
-                <Pressable onPress={() => handleInfoPress(place.name)}>
-                  <Text style={styles.infoLink}>Info</Text>
+                <Pressable onPress={() => handleInfoPress(place.name, place.lat, place.lon)}>
+                  <Text style={styles.infoLink}>Find out more!</Text>
                 </Pressable>
               </View>
             </Callout>

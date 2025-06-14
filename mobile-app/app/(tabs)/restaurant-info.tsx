@@ -10,7 +10,7 @@ interface ResearchEvent {
 }
 
 export default function RestaurantInfo() {
-  const { name } = useLocalSearchParams();
+  const { name, lat, lon } = useLocalSearchParams();
   const [events, setEvents] = useState<ResearchEvent[]>([]);
   const [finalAnswer, setFinalAnswer] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -35,7 +35,7 @@ export default function RestaurantInfo() {
               messages: [
                 {
                   role: "human",
-                  content: `Research about ${name} restaurant. Provide reviews from users and what the menu entails. Also provide the price range.`
+                  content: `Research about ${name} restaurant located at coordinates ${lat},${lon}. Provide reviews from users, what the menu entails, and the price range.`
                 }
               ],
               configurable: {
