@@ -35,7 +35,7 @@ export default function RestaurantInfo() {
               messages: [
                 {
                   role: "human",
-                  content: `Research about ${name} restaurant located at coordinates ${lat},${lon}. Provide reviews from users, what the menu entails, and the price range.`
+                  content: `Research about ${name} restaurant/amenity located at coordinates ${lat},${lon}. Provide food and user reviews, what the menu entails, and the price range.`
                 }
               ],
               configurable: {

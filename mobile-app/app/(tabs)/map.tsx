@@ -80,7 +80,7 @@ export default function MapScreen() {
                       }}
                       style={{ color: 'green', fontWeight: 'bold', textDecoration: 'none' }}
                     >
-                      Info
+                      Find out more!
                     </a>
                   </div>
                 </Popup>
