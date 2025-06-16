@@ -2,11 +2,12 @@ from typing import Any, Dict, List
 from langchain_core.messages import AnyMessage, AIMessage, HumanMessage
 
 
+
 def get_research_topic(messages: List[AnyMessage]) -> str:
     """
     Get the research topic from the messages.
     """
-    # check if request has a history and combine the messages into a single string
+
     if len(messages) == 1:
         research_topic = messages[-1].content
     else:
@@ -20,14 +21,11 @@ def get_research_topic(messages: List[AnyMessage]) -> str:
 
 
 def resolve_urls(urls_to_resolve: List[Any], id: int) -> Dict[str, str]:
-    """
-    Create a map of the vertex ai search urls (very long) to a short url with a unique id for each url.
-    Ensures each original URL gets a consistent shortened form while maintaining uniqueness.
-    """
+
     prefix = f"https://vertexaisearch.cloud.google.com/id/"
     urls = [site.web.uri for site in urls_to_resolve]
 
-    # Create a dictionary that maps each unique URL to its first occurrence index
+    # To save tokens
     resolved_map = {}
     for idx, url in enumerate(urls):
         if url not in resolved_map:
@@ -50,10 +48,7 @@ def insert_citation_markers(text, citations_list):
     Returns:
         str: The text with citation markers inserted.
     """
-    # Sort citations by end_index in descending order.
-    # If end_index is the same, secondary sort by start_index descending.
-    # This ensures that insertions at the end of the string don't affect
-    # the indices of earlier parts of the string that still need to be processed.
+
     sorted_citations = sorted(
         citations_list, key=lambda c: (c["end_index"], c["start_index"]), reverse=True
     )
@@ -107,7 +102,6 @@ def get_citations(response, resolved_urls_map):
     """
     citations = []
 
-    # Ensure response and necessary nested structures are present
     if not response or not response.candidates:
         return citations
 
