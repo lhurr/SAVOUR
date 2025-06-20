@@ -75,7 +75,7 @@ export default function MapScreen() {
                         e.preventDefault();
                         router.push({
                           pathname: '/restaurant-info',
-                          params: { name: place.name }
+                          params: { name: place.name, lat: place.lat, lon: place.lon }
                         });
                       }}
                       style={{ color: 'green', fontWeight: 'bold', textDecoration: 'none' }}
@@ -126,7 +126,7 @@ export default function MapScreen() {
   const handleInfoPress = (placeName: string, lat: number, lon: number) => {
     router.push({
       pathname: '/restaurant-info',
-      params: { name: placeName, lat: lat.toString(), lon: lon.toString() }
+      params: { name: placeName.replace(/\s+/g, "_") + " at_" + lat + "_" + lon }
     });
   };
 

@@ -8,6 +8,8 @@ services:
       - ./backend:/app/backend
     ports:
       - "2024:2024"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
     command: sh -c "pip install -e . && langgraph dev --host 0.0.0.0 --port 2024 --no-browser"
 
   frontend:
@@ -25,4 +27,8 @@ services:
     environment:
       - EXPO_DEV_SERVER_LISTEN_ADDRESS=0.0.0.0
       - EXPO_DEV_TOOLS_LISTEN_ADDRESS=0.0.0.0
-    command: sh -c "npm install && npx expo start" 
+    command: sh -c "npm install && npx expo start"
+
+  redis:
+    image: redis:7
+    restart: unless-stopped

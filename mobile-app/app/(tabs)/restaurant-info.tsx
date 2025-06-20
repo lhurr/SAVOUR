@@ -11,6 +11,7 @@ interface ResearchEvent {
 
 export default function RestaurantInfo() {
   const { name, lat, lon } = useLocalSearchParams();
+  console.log(name, lat, lon);
   const [events, setEvents] = useState<ResearchEvent[]>([]);
   const [finalAnswer, setFinalAnswer] = useState<string>('');
   const [loading, setLoading] = useState(true);
