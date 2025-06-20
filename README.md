@@ -55,13 +55,13 @@ Follow these steps to set up SAVOUR on your local machine:
 1. **Clone the Repository**
    ```bash
    git clone https://github.com/lhurr/SAVOUR.git
-   cd SAVOUR
+   cd SAVOUR      
    ```
 
 2. **Fetch API Keys**
    You'll need to obtain the following API keys:
-   - Supabase credentials
-   (Contact us for access to these keys)
+   - Supabase credentials (Contact for access to these keys)
+   - GEMINI_API_KEY (Gemini API key)
 
 3. **Set Up Environment Variables**
    - Copy the `.env.example` file to create a new `.env` file
@@ -70,25 +70,21 @@ Follow these steps to set up SAVOUR on your local machine:
    ```
    - Open the `.env` file and fill in the Supabase API keys 
 
-4. **Navigate to Mobile App Directory**
+4. **To Run (ensure Docker is installed)**
    ```bash
-   cd mobile-app
+   docker-compose up
    ```
 
-5. **Install Dependencies**
-   ```bash
-   npm install
-   ```
+5. **Requirements**
+   - Node
+   - Python 3.11
 
 6. **Start the Development Server**
-   ```bash
-   npx expo start
-   ```
    This will open the Expo development server where you can:
    - Press `i` to open iOS simulator
    - Press `a` to open Android emulator
    - Scan the QR code with your phone (requires Expo Go app)
    - Press `w` to open in web browser
 
-> Note: Make sure you have Node.js, npm, and Expo CLI installed on your system before starting.
+
 > Thank you for trying out SAVOUR, we appreciate any and all feedback!
