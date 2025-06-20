@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, ActivityIndicator, Alert, Platform, Text, Linking, Pressable } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, Alert, Platform, Text, Linking, Pressable, TouchableOpacity } from 'react-native';
 import * as Location from 'expo-location';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import { useRouter } from 'expo-router';
@@ -15,7 +15,6 @@ interface Place {
   website?: string;
 }
 
-
 // https://github.com/react-native-maps/react-native-maps, RENDEER using leaflet
 export default function MapScreen() {
   const router = useRouter();
@@ -24,6 +23,8 @@ export default function MapScreen() {
   const [loading, setLoading] = useState(true);
   const [MapComponent, setMapComponent] = useState<React.ComponentType | null>(null);
   const [mapLoading, setMapLoading] = useState(true);
+  const [radius, setRadius] = useState(1000); // Default 1km
+  const [showFilter, setShowFilter] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -40,6 +41,12 @@ export default function MapScreen() {
       fetchNearbyPlaces(currentLocation.coords.latitude, currentLocation.coords.longitude);
     })();
   }, []);
+
+  useEffect(() => {
+    if (location) {
+      fetchNearbyPlaces(location.coords.latitude, location.coords.longitude);
+    }
+  }, [radius]);
 
   useEffect(() => {
     if ((Platform.OS === 'web' || Platform.OS === 'ios') && location) {
@@ -75,7 +82,7 @@ export default function MapScreen() {
                         e.preventDefault();
                         router.push({
                           pathname: '/restaurant-info',
-                          params: { name: place.name, lat: place.lat, lon: place.lon }
+                          params: { name: place.name, address: place.address }
                         });
                       }}
                       style={{ color: 'green', fontWeight: 'bold', textDecoration: 'none' }}
@@ -98,7 +105,6 @@ export default function MapScreen() {
   }, [location, places]);
 
   const fetchNearbyPlaces = async (latitude: number, longitude: number) => {
-    const radius = 2000;
     const query = `[out:json];(node["amenity"~"restaurant|cafe|fast_food|bar|pub"](around:${radius},${latitude},${longitude}););out;`;
     const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
 
@@ -130,6 +136,58 @@ export default function MapScreen() {
     });
   };
 
+  const RadiusFilter = () => (
+    <View style={styles.filterContainer}>
+      <TouchableOpacity 
+        style={styles.filterToggle} 
+        onPress={() => setShowFilter(!showFilter)}
+      >
+        <Text style={styles.filterToggleText}>
+          Radius: {radius}m {showFilter ? '▼' : '▲'}
+        </Text>
+      </TouchableOpacity>
+      
+      {showFilter && (
+        <View style={styles.filterOptions}>
+          <TouchableOpacity 
+            style={[styles.radiusButton, radius === 500 && styles.radiusButtonActive]}
+            onPress={() => setRadius(500)}
+          >
+            <Text style={[styles.radiusButtonText, radius === 500 && styles.radiusButtonTextActive]}>
+              500m
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.radiusButton, radius === 750 && styles.radiusButtonActive]}
+            onPress={() => setRadius(750)}
+          >
+            <Text style={[styles.radiusButtonText, radius === 750 && styles.radiusButtonTextActive]}>
+              750m
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.radiusButton, radius === 1000 && styles.radiusButtonActive]}
+            onPress={() => setRadius(1000)}
+          >
+            <Text style={[styles.radiusButtonText, radius === 1000 && styles.radiusButtonTextActive]}>
+              1km
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[styles.radiusButton, radius === 2000 && styles.radiusButtonActive]}
+            onPress={() => setRadius(2000)}
+          >
+            <Text style={[styles.radiusButtonText, radius === 2000 && styles.radiusButtonTextActive]}>
+              2km
+            </Text>
+          </TouchableOpacity>
+
+        </View>
+      )}
+    </View>
+  );
+
   if (loading || !location || ((Platform.OS === 'web' || Platform.OS === 'ios') && mapLoading)) {
     return (
       <View style={styles.loader}>
@@ -140,7 +198,12 @@ export default function MapScreen() {
   }
 
   if (Platform.OS === 'web') {
-    return MapComponent ? <MapComponent /> : <Text>Failed to load map.</Text>;
+    return (
+      <View style={styles.container}>
+        {MapComponent && <MapComponent />}
+        <RadiusFilter />
+      </View>
+    );
   }
 
   return (
@@ -185,6 +248,7 @@ export default function MapScreen() {
           </Marker>
         ))}
       </MapView>
+      <RadiusFilter />
     </View>
   );
 }
@@ -209,5 +273,56 @@ const styles = StyleSheet.create({
     color: 'green',
     marginTop: 8,
     fontWeight: 'bold',
+  },
+  filterContainer: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'white',
+    padding: 8,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    zIndex: 1000,
+  },
+  filterToggle: {
+    padding: 8,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 6,
+  },
+  filterToggleText: {
+    fontWeight: 'bold',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  filterOptions: {
+    marginTop: 8,
+    gap: 4,
+  },
+  radiusButton: {
+    padding: 8,
+    borderRadius: 4,
+    backgroundColor: '#f8f8f8',
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  radiusButtonActive: {
+    backgroundColor: '#007AFF',
+    borderColor: '#007AFF',
+  },
+  radiusButtonText: {
+    fontWeight: 'bold',
+    fontSize: 12,
+    textAlign: 'center',
+    color: '#333',
+  },
+  radiusButtonTextActive: {
+    color: 'white',
   },
 });
