@@ -10,7 +10,7 @@ interface ResearchEvent {
 }
 
 export default function RestaurantInfo() {
-  const { name, lat, lon } = useLocalSearchParams();
+  const { name, address } = useLocalSearchParams();
   const [events, setEvents] = useState<ResearchEvent[]>([]);
   const [finalAnswer, setFinalAnswer] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -35,13 +35,13 @@ export default function RestaurantInfo() {
               messages: [
                 {
                   role: "human",
-                  content: `Research about ${name} restaurant/amenity located at coordinates ${lat},${lon}. Provide food and user reviews, what the menu entails, and the price range.`
+                  content: `Research about ${name} restaurant/amenity located at ${address}. Provide food and user reviews, what the menu entails, and the price range.`
                 }
               ],
               configurable: {
-                query_generator_model: "gemini-2.0-flash",
-                reflection_model: "gemini-2.0-flash",
-                answer_model: "gemini-2.0-flash",
+                query_generator_model: "gemini-2.5-flash",
+                reflection_model: "gemini-2.5-flash",
+                answer_model: "gemini-2.5-flash",
                 number_of_initial_queries: 3,
                 max_research_loops: 3
               }

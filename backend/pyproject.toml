@@ -16,6 +16,7 @@ dependencies = [
     "langgraph-api",
     "fastapi",
     "google-genai",
+    "redis",
 ]
 
 
