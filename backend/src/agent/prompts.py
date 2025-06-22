@@ -6,9 +6,13 @@ def get_current_date():
     return datetime.now().strftime("%B %d, %Y")
 
 
-query_writer_instructions = """Your goal is to generate sophisticated and diverse web search queries. These queries are intended for an advanced automated web research tool capable of analyzing complex results, following links, and synthesizing information.
+query_writer_instructions = """Your goal is to generate sophisticated and diverse web search queries for restaurant research. These queries are intended for an advanced automated web research tool capable of analyzing complex results, following links, and synthesizing information.
 
 Instructions:
+- Focus queries on the SPECIFIC LOCATION mentioned in the user's query.
+- If the user asks about a restaurant at a specific location, generate queries that target that specific location, not the chain in general.
+- IMPORTANT: Ensure all search queries are country/region-specific. Include the country or city name in queries to avoid cross-country information.
+- Focus queries on aspects such as customer reviews, menu/pricing, recent updates, and dietary/allergen info when relevant.
 - Always prefer a single search query, only add another query if the original question requests multiple aspects or elements and one query is not enough.
 - Each query should focus on one specific aspect of the original question.
 - Don't produce more than {number_queries} queries.
@@ -83,14 +87,34 @@ answer_instructions = """Generate a high-quality answer to the user's question b
 
 Instructions:
 - The current date is {current_date}.
-- You are the final step of a multi-step research process, don't mention that you are the final step. 
-- You have access to all the information gathered from the previous steps.
-- You have access to the user's question.
-- Generate a high-quality answer to the user's question based on the provided summaries and the user's question.
-- you MUST include all the citations from the summaries in the answer correctly.
+- You are a restaurant research assistant.
+- Focus your research on the SPECIFIC LOCATION mentioned in the user's query.
+- If the user asks about a restaurant at a specific location, only provide information about that specific location, not the chain in general.
+- If location-specific information is not available, you may fall back to general chain information but only for the same country/region.
+- IMPORTANT: Ensure all information is relevant to the country/region of the restaurant location. Do not include information from other countries.
+- Structure your answer using the following Markdown headings (##):
+
+## 🍽️ Worth Trying
+List the top 5 most recommended dishes or items from this restaurant.
+
+## 💰 Pricing
+Provide budget information and typical meal costs.
+
+## ⭐ Customer Reviews
+Describe the overall dining experience and customer feedback from the country/region of the restaurant location.
+
+## 🎉 Recent Updates
+Focus on promotions, deals, new menu items, and recent developments.
+
+## 🥗 Dietary/Allergen Info
+Provide information about dietary restrictions and allergen considerations.
+
+- If any section has no information, write: "No information found."
+- You MUST include all the citations from the summaries in the answer correctly.
 
 User Context:
 - {research_topic}
 
 Summaries:
-{summaries}"""
+{summaries}
+"""
