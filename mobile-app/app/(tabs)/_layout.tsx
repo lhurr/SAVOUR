@@ -83,13 +83,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="chat"
-        options={{
-          title: 'CHAT',
-          tabBarIcon: ({ color }) => <IconSymbol name="message.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="map"
         options={{
           title: 'MAP',
@@ -101,6 +94,13 @@ export default function TabLayout() {
         options={{
           title: 'PROFILE',
           tabBarIcon: ({ color }) => <IconSymbol name="person.crop.circle.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="restaurant-info"
+        options={{
+          title: 'INFO',
+          tabBarIcon: ({ color }) => <IconSymbol name="magnifyingglass" color={color} />,
         }}
       />
     </Tabs>

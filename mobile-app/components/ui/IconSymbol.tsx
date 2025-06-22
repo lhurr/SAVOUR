@@ -19,7 +19,8 @@ const MAPPING = {
   'message.fill': 'chat',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
-  'person.crop.circle.fill': 'account-circle'
+  'person.crop.circle.fill': 'account-circle',
+  'magnifyingglass': 'search'
 } as IconMapping;
 
 /**
