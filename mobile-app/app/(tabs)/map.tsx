@@ -129,10 +129,10 @@ export default function MapScreen() {
     }
   };
 
-  const handleInfoPress = (placeName: string, lat: number, lon: number) => {
+  const handleInfoPress = (placeName: string, address: string) => {
     router.push({
       pathname: '/restaurant-info',
-      params: { name: placeName.replace(/\s+/g, "_") + " at_" + lat + "_" + lon }
+      params: { name: placeName, address: address }
     });
   };
 
@@ -240,7 +240,7 @@ export default function MapScreen() {
                 <Text style={styles.link} onPress={() => Linking.openURL(place.link)}>
                   Source Link
                 </Text>
-                <Pressable onPress={() => handleInfoPress(place.name, place.lat, place.lon)}>
+                <Pressable onPress={() => handleInfoPress(place.name, place.address || '')}>
                   <Text style={styles.infoLink}>Find out more!</Text>
                 </Pressable>
               </View>

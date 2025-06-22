@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import Constants from 'expo-constants';
 import Markdown from 'react-native-markdown-display';
 
@@ -11,10 +11,20 @@ interface ResearchEvent {
 
 export default function RestaurantInfo() {
   const { name, address } = useLocalSearchParams();
+  const router = useRouter();
   const [events, setEvents] = useState<ResearchEvent[]>([]);
   const [finalAnswer, setFinalAnswer] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const scrollViewRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    console.log('Search params :', { name, address, nameType: typeof name, addressType: typeof address });
+  }, [name, address]);
+
+  if (name === undefined && address === undefined) {
+
+    router.replace('/map');
+  }
 
   useEffect(() => {
     const fetchRestaurantInfo = async () => {
@@ -147,7 +157,7 @@ export default function RestaurantInfo() {
     if (name) {
       fetchRestaurantInfo();
     }
-  }, [name]);
+  }, [name, address]);
 
   useEffect(() => {
     if (scrollViewRef.current) {
@@ -243,17 +253,17 @@ const markdownStyles = {
   },
   heading1: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: 'bold' as const,
     marginBottom: 16,
   },
   heading2: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: 'bold' as const,
     marginBottom: 12,
   },
   heading3: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: 'bold' as const,
     marginBottom: 8,
   },
   paragraph: {
@@ -261,13 +271,13 @@ const markdownStyles = {
   },
   link: {
     color: '#2196F3',
-    textDecorationLine: 'underline',
+    textDecorationLine: 'underline' as const,
   },
   strong: {
-    fontWeight: 'bold',
+    fontWeight: 'bold' as const,
   },
   em: {
-    fontStyle: 'italic',
+    fontStyle: 'italic' as const,
   },
   list: {
     marginBottom: 12,
