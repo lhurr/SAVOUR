@@ -3,6 +3,7 @@ import { StyleSheet, View, ActivityIndicator, Alert, Platform, Text, Linking, Pr
 import * as Location from 'expo-location';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import { useRouter } from 'expo-router';
+import { RestaurantService } from '../../lib/database';
 
 interface Place {
   id: string;
@@ -80,10 +81,7 @@ export default function MapScreen() {
                       href="#" 
                       onClick={(e) => {
                         e.preventDefault();
-                        router.push({
-                          pathname: '/restaurant-info',
-                          params: { name: place.name, address: place.address }
-                        });
+                        handleInfoPress(place.name, place.address || '', place.cuisine);
                       }}
                       style={{ color: 'green', fontWeight: 'bold', textDecoration: 'none' }}
                     >
@@ -129,7 +127,18 @@ export default function MapScreen() {
     }
   };
 
-  const handleInfoPress = (placeName: string, address: string) => {
+  const handleInfoPress = async (placeName: string, address: string, cuisine?: string) => {
+    try {
+      await RestaurantService.recordInteraction(
+        placeName,
+        address || '',
+        cuisine || '',
+        'click'
+      );
+    } catch (error) {
+      console.error('err recording interaction:', error);
+    }
+
     router.push({
       pathname: '/restaurant-info',
       params: { name: placeName, address: address }
@@ -240,7 +249,7 @@ export default function MapScreen() {
                 <Text style={styles.link} onPress={() => Linking.openURL(place.link)}>
                   Source Link
                 </Text>
-                <Pressable onPress={() => handleInfoPress(place.name, place.address || '')}>
+                <Pressable onPress={() => handleInfoPress(place.name, place.address || '', place.cuisine)}>
                   <Text style={styles.infoLink}>Find out more!</Text>
                 </Pressable>
               </View>

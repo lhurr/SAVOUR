@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Constants from 'expo-constants';
 import Markdown from 'react-native-markdown-display';
+import { RestaurantService } from '../../lib/database';
 
 interface ResearchEvent {
   title: string;
@@ -15,14 +16,29 @@ export default function RestaurantInfo() {
   const [events, setEvents] = useState<ResearchEvent[]>([]);
   const [finalAnswer, setFinalAnswer] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
   useEffect(() => {
-    console.log('Search params :', { name, address, nameType: typeof name, addressType: typeof address });
+    const checkFavoriteStatus = async () => {
+      if (!name || !address) return;
+      
+      try {
+        const favorites = await RestaurantService.getFavoriteRestaurants();
+        const isAlreadyFavorite = favorites.some(
+          fav => fav.restaurant_name === name && fav.restaurant_address === address
+        );
+        setIsFavorite(isAlreadyFavorite);
+      } catch (error) {
+        console.error('Error checking favorite status:', error);
+      }
+    };
+
+    checkFavoriteStatus();
   }, [name, address]);
 
   if (name === undefined && address === undefined) {
-
     router.replace('/map');
   }
 
@@ -32,6 +48,20 @@ export default function RestaurantInfo() {
         setLoading(true);
         setEvents([]);
         setFinalAnswer('');
+
+        // record a view interaction
+        if (name || address) {
+          try {
+            await RestaurantService.recordInteraction(
+              name as string,
+              address as string,
+              '', 
+              'view'
+            );
+          } catch (error) {
+            console.error('Error recording view interaction:', error);
+          }
+        }
 
         const apiUrl = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:2024';
         const response = await fetch(`${apiUrl}/runs/stream`, {
@@ -49,9 +79,9 @@ export default function RestaurantInfo() {
                 }
               ],
               configurable: {
-                query_generator_model: "gemini-2.5-flash",
-                reflection_model: "gemini-2.5-flash",
-                answer_model: "gemini-2.5-flash",
+                query_generator_model: "gemini-2.5-flash-lite-preview-06-17",
+                reflection_model: "gemini-2.5-flash-lite-preview-06-17",
+                answer_model: "gemini-2.5-flash-lite-preview-06-17",
                 number_of_initial_queries: 1,
                 max_research_loops: 1
               }
@@ -93,18 +123,16 @@ export default function RestaurantInfo() {
                 // if (currentEvent === 'messages') {
                   if (Array.isArray(data)) {
 
-                    console.log(data.length)
                     data.forEach((message, index) => {
-                      console.log(`Processing message ${index}:`, message.content);
+                      // console.log(`message ${index}:`, message.content);
                       
                       if (typeof message === 'object' && message !== null) {
                         console.log('Object message:', JSON.stringify(message, null, 2));
                         if (message.content) {
-                          console.log('Setting final answer with content:', message.content);
+                          // console.log('final answer with content:', message.content);
                           setFinalAnswer(message.content);
                         }
                         if (message.tool_calls) {
-                          console.log('Processing tool calls:', JSON.stringify(message.tool_calls, null, 2));
                           message.tool_calls.forEach((toolCall: any) => {
                             if (toolCall.name === 'SearchQueryList') {
                               setEvents(prev => [...prev, {
@@ -165,6 +193,30 @@ export default function RestaurantInfo() {
     }
   }, [events, finalAnswer]);
 
+  const handleToggleFavorite = async () => {
+    if (!name || !address) return;
+    
+    setFavoriteLoading(true);
+    try {
+      const result = await RestaurantService.toggleFavorite(
+        name as string,
+        address as string
+      );
+      setIsFavorite(result.isFavorite);
+      
+      if (result.isFavorite) {
+        Alert.alert('Success', 'Restaurant added to favorites!');
+      } else {
+        Alert.alert('Success', 'Restaurant removed from favorites!');
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      Alert.alert('Error', 'Failed to update favorite status');
+    } finally {
+      setFavoriteLoading(false);
+    }
+  };
+
   if (loading && events.length === 0) {
     return (
       <View style={styles.container}>
@@ -176,7 +228,26 @@ export default function RestaurantInfo() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{name}</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>{name}</Text>
+        <TouchableOpacity 
+          style={[
+            styles.favoriteButton, 
+            isFavorite && styles.favoriteButtonActive,
+            favoriteLoading && styles.favoriteButtonLoading
+          ]}
+          onPress={handleToggleFavorite}
+          disabled={favoriteLoading}
+        >
+          <Text style={[
+            styles.favoriteButtonText, 
+            isFavorite && styles.favoriteButtonTextActive
+          ]}>
+            {favoriteLoading ? '⏳' : (isFavorite ? '❤️ ' : '🤍 ')} 
+            {favoriteLoading ? 'Loading...' : (isFavorite ? 'Favorited' : 'Favorite')}
+          </Text>
+        </TouchableOpacity>
+      </View>
       <ScrollView 
         ref={scrollViewRef}
         style={styles.scrollView}
@@ -206,10 +277,18 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#fff',
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+    gap: 12,
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 16,
+    flex: 1,
+    color: '#333',
   },
   scrollView: {
     flex: 1,
@@ -242,6 +321,32 @@ const styles = StyleSheet.create({
     padding: 12,
     backgroundColor: '#e8f5e9',
     borderRadius: 8,
+  },
+  favoriteButton: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  favoriteButtonActive: {
+    backgroundColor: '#FF6B6B',
+    borderColor: '#FF6B6B',
+  },
+  favoriteButtonLoading: {
+    backgroundColor: '#ccc',
+    borderColor: '#ccc',
+  },
+  favoriteButtonText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  favoriteButtonTextActive: {
+    color: '#fff',
   },
 });
 
