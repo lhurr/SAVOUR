@@ -172,7 +172,10 @@ export default function Profile() {
       {/* recent Restaurants */}
       {recentRestaurants.length > 0 && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Visits</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Recent Visits</Text>
+            {/* <Text style={styles.favoriteIndicator}>❤️ Favorites</Text> */}
+          </View>
           {recentRestaurants.map((interaction) => (
             <RestaurantCard key={interaction.id} interaction={interaction} />
           ))}
@@ -392,5 +395,15 @@ const styles = StyleSheet.create({
     color: colors.text.secondary.light,
     textAlign: 'center',
     lineHeight: 20,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  favoriteIndicator: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#FF3B30',
   },
 });
