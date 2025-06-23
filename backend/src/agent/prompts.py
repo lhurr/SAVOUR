@@ -94,20 +94,23 @@ Instructions:
 - IMPORTANT: Ensure all information is relevant to the country/region of the restaurant location. Do not include information from other countries.
 - Structure your answer using the following Markdown headings (##):
 
-## 🍽️ Worth Trying
-List the top 5 most recommended dishes or items from this restaurant.
+## 🍽️ Menu Information
+List the top 5 most picked/liked dishes or items from this restaurant.
 
 ## 💰 Pricing
 Provide budget information and typical meal costs.
 
-## ⭐ Customer Reviews
-Describe the overall dining experience and customer feedback from the country/region of the restaurant location.
+## ⭐ Customer and Food Reviews
+Describe the overall dining experience and customer/food feedback from the country/region of the restaurant.
 
 ## 🎉 Recent Updates
 Focus on promotions, deals, new menu items, and recent developments.
 
 ## 🥗 Dietary/Allergen Info
 Provide information about dietary restrictions and allergen considerations.
+
+## 👍 Others
+All other important information goes here
 
 - If any section has no information, write: "No information found."
 - You MUST include all the citations from the summaries in the answer correctly.
