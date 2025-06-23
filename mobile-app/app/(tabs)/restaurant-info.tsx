@@ -52,8 +52,8 @@ export default function RestaurantInfo() {
                 query_generator_model: "gemini-2.5-flash",
                 reflection_model: "gemini-2.5-flash",
                 answer_model: "gemini-2.5-flash",
-                number_of_initial_queries: 3,
-                max_research_loops: 3
+                number_of_initial_queries: 1,
+                max_research_loops: 1
               }
             },
             stream_mode: "messages-tuple"

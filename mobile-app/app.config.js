@@ -24,10 +24,14 @@ export default {
       }
     },
     web: {
+      output: 'server',
       favicon: './assets/favicon.png'
     },
     extra: {
-      apiUrl: process.env.API_URL || 'http://localhost:2024'
+      apiUrl:'https://savour-backend.onrender.com',
+      "eas": {
+        "projectId": "bcc5e80c-d94d-4fea-8931-9ef0d35a3065"
+      }
     }
   }
 };
