@@ -21,7 +21,7 @@ Instructions:
 - Query should ensure that the most current information is gathered. The current date is {current_date}.
 
 Format: 
-- Format your response as a JSON object with ALL three of these exact keys:
+- You must format your response as a JSON object with ALL three of these exact keys:
    - "rationale": Brief explanation of why these queries are relevant
    - "query": A list of search queries
 
@@ -63,7 +63,7 @@ Requirements:
 - Ensure the follow-up query is self-contained and includes necessary context for web search.
 
 Output Format:
-- Format your response as a JSON object with these exact keys:
+- You must format your response as a JSON object with these exact keys:
    - "is_sufficient": true or false
    - "knowledge_gap": Describe what information is missing or needs clarification
    - "follow_up_queries": Write a specific question to address this gap
