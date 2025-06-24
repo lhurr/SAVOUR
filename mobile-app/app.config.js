@@ -28,7 +28,7 @@ export default {
       favicon: './assets/favicon.png'
     },
     extra: {
-      apiUrl:'https://savour-backend.onrender.com', // or http://localhost:2024
+      apiUrl:'https://savour-backend.onrender.com', // https://savour-backend.onrender.com or http://localhost:2024
       "eas": {
         "projectId": "bcc5e80c-d94d-4fea-8931-9ef0d35a3065"
       }

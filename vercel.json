@@ -1,6 +1,0 @@
-{
-  "framework": "expo",
-  "buildCommand": "cd mobile-app && npm run build:web",
-  "installCommand": "cd mobile-app && npm install",
-  "outputDirectory": "mobile-app/dist"
-} 
