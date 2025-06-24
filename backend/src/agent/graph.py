@@ -213,7 +213,7 @@ def evaluate_research(
         else configurable.max_research_loops
     )
     if state["is_sufficient"] or state["research_loop_count"] >= max_research_loops:
-        return "finalize_answer"
+        return ["finalize_answer"]
     else:
         return [
             Send(

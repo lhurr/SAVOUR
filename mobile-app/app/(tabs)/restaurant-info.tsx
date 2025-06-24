@@ -127,7 +127,6 @@ export default function RestaurantInfo() {
                       // console.log(`message ${index}:`, message.content);
                       
                       if (typeof message === 'object' && message !== null) {
-                        console.log('Object message:', JSON.stringify(message, null, 2));
                         if (message.content) {
                           // console.log('final answer with content:', message.content);
                           setFinalAnswer(message.content);
