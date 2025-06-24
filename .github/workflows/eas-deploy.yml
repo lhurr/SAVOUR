@@ -1,4 +1,4 @@
-name: EAS Deploy on Main Merge
+name: EAS Deploy Web on Main Merge
 
 on:
   push:
@@ -18,14 +18,17 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        working-directory: mobile-app
 
       - name: Install EAS CLI
         run: npm install --global eas-cli
 
       - name: Export web build
         run: npx expo export --platform web
+        working-directory: mobile-app
 
       - name: EAS Deploy (Production)
         env:
           EAS_TOKEN: ${{ secrets.EAS_TOKEN }}
         run: eas deploy --prod --non-interactive
+        working-directory: mobile-app
