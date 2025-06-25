@@ -22,13 +22,20 @@ export default function RestaurantInfo() {
 
   useEffect(() => {
     const checkFavoriteStatus = async () => {
-      if (!name || !address) return;
+      if (!name && !address) return;
       
       try {
         const favorites = await RestaurantService.getFavoriteRestaurants();
-        const isAlreadyFavorite = favorites.some(
-          fav => fav.restaurant_name === name && fav.restaurant_address === address
-        );
+        const isAlreadyFavorite = favorites.some(fav => {
+          if (name && address) {
+            return fav.restaurant_name === name && fav.restaurant_address === address;
+          } else if (name) {
+            return fav.restaurant_name === name;
+          } else if (address) {
+            return fav.restaurant_address === address;
+          }
+          return false;
+        });
         setIsFavorite(isAlreadyFavorite);
       } catch (error) {
         console.error('Error checking favorite status:', error);
@@ -53,14 +60,23 @@ export default function RestaurantInfo() {
         if (name || address) {
           try {
             await RestaurantService.recordInteraction(
-              name as string,
-              address as string,
+              name as string || '',
+              address as string || '',
               '', 
               'view'
             );
           } catch (error) {
             console.error('Error recording view interaction:', error);
           }
+        }
+
+        // Don't make API call if we don't have any restaurant information
+        if (!name && !address) {
+          setEvents(prev => [...prev, {
+            title: "Error",
+            data: "No restaurant information available"
+          }]);
+          return;
         }
 
         const apiUrl = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:2024';
@@ -75,7 +91,7 @@ export default function RestaurantInfo() {
               messages: [
                 {
                   role: "human",
-                  content: `Research about ${name} restaurant/amenity located at ${address}. Provide food and user reviews, what the menu entails, and the price range.`
+                  content: `Research about ${name || ''} restaurant/amenity ${address ? ` located at ${address}` : ''}. Provide food and user reviews, what the menu entails, and the price range.`
                 }
               ],
               configurable: {
@@ -89,6 +105,10 @@ export default function RestaurantInfo() {
             stream_mode: "messages-tuple"
           })
         });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
         const reader = response.body?.getReader();
         if (!reader) throw new Error('No reader available');
@@ -118,48 +138,47 @@ export default function RestaurantInfo() {
               try {
                 const data = JSON.parse(currentData);
                 console.log('Received data:', data);
-                // console.log(Array.isArray(data));
 
-                // if (currentEvent === 'messages') {
-                  if (Array.isArray(data)) {
+                if (data.error) {
+                  setEvents(prev => [...prev, {
+                    title: "Error",
+                    data: `API Error: ${data.message || data.error}`
+                  }]);
+                  continue;
+                }
 
-                    data.forEach((message, index) => {
-                      // console.log(`message ${index}:`, message.content);
-                      
-                      if (typeof message === 'object' && message !== null) {
-                        if (message.content) {
-                          // console.log('final answer with content:', message.content);
-                          setFinalAnswer(message.content);
-                        }
-                        if (message.tool_calls) {
-                          message.tool_calls.forEach((toolCall: any) => {
-                            if (toolCall.name === 'SearchQueryList') {
-                              setEvents(prev => [...prev, {
-                                title: "Search Queries",
-                                data: toolCall.args.query.join(", ")
-                              }]);
-                            } else if (toolCall.name === 'Reflection') {
-                              setEvents(prev => [...prev, {
-                                title: "Research Status",
-                                data: toolCall.args.is_sufficient
-                                  ? "Research complete, generating final answer."
-                                  : `Continuing research with: ${toolCall.args.follow_up_queries?.join(", ") || "additional queries"}`
-                              }]);
-                            }
-                          });
-                        }
+                if (Array.isArray(data)) {
+                  data.forEach((message, index) => {
+                    if (typeof message === 'object' && message !== null) {
+                      if (message.content) {
+                        setFinalAnswer(message.content);
                       }
-                    });
-                  } else {
-                    console.log('Received non-array data:', JSON.stringify(data, null, 2));
-                    if (typeof data === 'object' && data !== null) {
-                      if (data.content) {
-                        console.log('Setting final answer with single message content:', data.content);
-                        setFinalAnswer(data.content);
+                      if (message.tool_calls) {
+                        message.tool_calls.forEach((toolCall: any) => {
+                          if (toolCall.name === 'SearchQueryList') {
+                            setEvents(prev => [...prev, {
+                              title: "Search Queries",
+                              data: toolCall.args.query.join(", ")
+                            }]);
+                          } else if (toolCall.name === 'Reflection') {
+                            setEvents(prev => [...prev, {
+                              title: "Research Status",
+                              data: toolCall.args.is_sufficient
+                                ? "Research complete, generating final answer."
+                                : `Continuing research with: ${toolCall.args.follow_up_queries?.join(", ") || "additional queries"}`
+                            }]);
+                          }
+                        });
                       }
                     }
+                  });
+                } else {
+                  if (typeof data === 'object' && data !== null) {
+                    if (data.content) {
+                      setFinalAnswer(data.content);
+                    }
                   }
-                // }
+                }
               } catch (e) {
                 console.error('Error parsing event data:', e, 'Line:', line);
                 setEvents(prev => [...prev, {
@@ -174,14 +193,14 @@ export default function RestaurantInfo() {
         console.error('Error fetching restaurant info:', error);
         setEvents(prev => [...prev, {
           title: "Error",
-          data: "Failed to load restaurant information"
+          data: `Failed to load restaurant information: ${error instanceof Error ? error.message : 'Unknown error'}`
         }]);
       } finally {
         setLoading(false);
       }
     };
 
-    if (name) {
+    if (name || address) {
       fetchRestaurantInfo();
     }
   }, [name, address]);
@@ -193,13 +212,16 @@ export default function RestaurantInfo() {
   }, [events, finalAnswer]);
 
   const handleToggleFavorite = async () => {
-    if (!name || !address) return;
+    if (!name && !address) {
+      Alert.alert('Error', 'Cannot favorite restaurant without name or address');
+      return;
+    }
     
     setFavoriteLoading(true);
     try {
       const result = await RestaurantService.toggleFavorite(
-        name as string,
-        address as string
+        name as string || '',
+        address as string || ''
       );
       setIsFavorite(result.isFavorite);
       
@@ -220,7 +242,9 @@ export default function RestaurantInfo() {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" />
-        <Text style={styles.loadingText}>Researching {name}...</Text>
+        <Text style={styles.loadingText}>
+          Researching {name || address || 'restaurant'}...
+        </Text>
       </View>
     );
   }
@@ -228,19 +252,23 @@ export default function RestaurantInfo() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>{name}</Text>
+        <Text style={styles.title}>
+          {name || address || 'Unknown Restaurant'}
+        </Text>
         <TouchableOpacity 
           style={[
             styles.favoriteButton, 
             isFavorite && styles.favoriteButtonActive,
-            favoriteLoading && styles.favoriteButtonLoading
+            favoriteLoading && styles.favoriteButtonLoading,
+            (!name && !address) && styles.favoriteButtonDisabled
           ]}
           onPress={handleToggleFavorite}
-          disabled={favoriteLoading}
+          disabled={favoriteLoading || (!name && !address)}
         >
           <Text style={[
             styles.favoriteButtonText, 
-            isFavorite && styles.favoriteButtonTextActive
+            isFavorite && styles.favoriteButtonTextActive,
+            (!name && !address) && styles.favoriteButtonTextDisabled
           ]}>
             {favoriteLoading ? '⏳' : (isFavorite ? '❤️ ' : '🤍 ')} 
             {favoriteLoading ? 'Loading...' : (isFavorite ? 'Favorited' : 'Favorite')}
@@ -339,6 +367,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#ccc',
     borderColor: '#ccc',
   },
+  favoriteButtonDisabled: {
+    backgroundColor: '#f5f5f5',
+    borderColor: '#ddd',
+    opacity: 0.6,
+  },
   favoriteButtonText: {
     fontSize: 14,
     fontWeight: 'bold',
@@ -346,6 +379,9 @@ const styles = StyleSheet.create({
   },
   favoriteButtonTextActive: {
     color: '#fff',
+  },
+  favoriteButtonTextDisabled: {
+    color: '#999',
   },
 });
 

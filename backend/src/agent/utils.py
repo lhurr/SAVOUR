@@ -1,29 +1,51 @@
 from typing import Any, Dict, List
-from langchain_core.messages import AnyMessage, AIMessage, HumanMessage
 
+from langchain_core.messages import AIMessage, AnyMessage, HumanMessage
 
 
 def get_research_topic(messages: List[AnyMessage]) -> str:
     """
     Get the research topic from the messages.
     """
-
-    if len(messages) == 1:
-        research_topic = messages[-1].content
-    else:
-        research_topic = ""
-        for message in messages:
-            if isinstance(message, HumanMessage):
-                research_topic += f"User: {message.content}\n"
-            elif isinstance(message, AIMessage):
-                research_topic += f"Assistant: {message.content}\n"
-    return research_topic
+    if not messages or len(messages) == 0:
+        return "No research topic provided"
+    
+    try:
+        if len(messages) == 1:
+            research_topic = messages[-1].content
+            if not research_topic:
+                return "No research topic provided"
+            return research_topic
+        else:
+            research_topic = ""
+            for message in messages:
+                if isinstance(message, HumanMessage) and message.content:
+                    research_topic += f"User: {message.content}\n"
+                elif isinstance(message, AIMessage) and message.content:
+                    research_topic += f"Assistant: {message.content}\n"
+            
+            if not research_topic.strip():
+                return "No research topic provided"
+            return research_topic
+    except Exception as e:
+        print(f"Error in get_research_topic: {e}")
+        return "Error processing research topic"
 
 
 def resolve_urls(urls_to_resolve: List[Any], id: int) -> Dict[str, str]:
+    if not urls_to_resolve:
+        return {}
 
     prefix = f"https://vertexaisearch.cloud.google.com/id/"
-    urls = [site.web.uri for site in urls_to_resolve]
+    
+    try:
+        urls = []
+        for site in urls_to_resolve:
+            if hasattr(site, 'web') and hasattr(site.web, 'uri') and site.web.uri:
+                urls.append(site.web.uri)
+    except Exception as e:
+        print(f"Error extracting URLs: {e}")
+        return {}
 
     # To save tokens
     resolved_map = {}

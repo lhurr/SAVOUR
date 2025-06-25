@@ -118,32 +118,51 @@ def web_research(state: WebSearchState, config: RunnableConfig) -> OverallState:
         research_topic=state["search_query"],
     )
 
-    # Uses the google genai client as the langchain client doesn't return grounding metadata
-    response = genai_client.models.generate_content(
-        model=configurable.query_generator_model,
-        contents=formatted_prompt,
-        config={
-            "tools": [{"google_search": {}}],
-            "temperature": 0,
-        },
-    )
-    # resolve the urls to short urls for saving tokens and time
-    resolved_urls = resolve_urls(
-        response.candidates[0].grounding_metadata.grounding_chunks, state["id"]
-    )
-    # Gets the citations and adds them to the generated text
-    citations = get_citations(response, resolved_urls)
-    modified_text = insert_citation_markers(response.text, citations)
-    sources_gathered = [item for citation in citations for item in citation["segments"]]
+    try:
+        # Uses the google genai client as the langchain client doesn't return grounding metadata
+        response = genai_client.models.generate_content(
+            model=configurable.query_generator_model,
+            contents=formatted_prompt,
+            config={
+                "tools": [{"google_search": {}}],
+                "temperature": 0,
+            },
+        )
+        
+        if not response or not response.candidates or len(response.candidates) == 0:
+            raise ValueError("Invalid response from Gemini API")
+            
+        candidate = response.candidates[0]
+        if not hasattr(candidate, 'grounding_metadata') or not candidate.grounding_metadata:
+            modified_text = response.text
+            sources_gathered = []
+        else:
+            # resolve the urls to short urls for saving tokens and time
+            resolved_urls = resolve_urls(
+                candidate.grounding_metadata.grounding_chunks, state["id"]
+            )
+            # citations
+            citations = get_citations(response, resolved_urls)
+            modified_text = insert_citation_markers(response.text, citations)
+            sources_gathered = [item for citation in citations for item in citation["segments"]]
 
-    result = {
-        "sources_gathered": sources_gathered,
-        "search_query": [state["search_query"]],
-        "web_research_result": [modified_text],
-    }
-    # Cache for 1 hour
-    r.setex(cache_key, 3600, __import__('json').dumps(result))
-    return result
+        result = {
+            "sources_gathered": sources_gathered,
+            "search_query": [state["search_query"]],
+            "web_research_result": [modified_text],
+        }
+        # Cache for 1 hour
+        r.setex(cache_key, 3600, __import__('json').dumps(result))
+        return result
+        
+    except Exception as e:
+        print(f"Error in web_research: {e}")
+        # Return a fallback result
+        return {
+            "sources_gathered": [],
+            "search_query": [state["search_query"]],
+            "web_research_result": [f"Error occurred during web research: {str(e)}"],
+        }
 
 
 def reflection(state: OverallState, config: RunnableConfig) -> ReflectionState:
@@ -179,15 +198,31 @@ def reflection(state: OverallState, config: RunnableConfig) -> ReflectionState:
         max_retries=2,
         api_key=os.getenv("GEMINI_API_KEY"),
     )
-    result = llm.with_structured_output(Reflection).invoke(formatted_prompt)
-
-    return {
-        "is_sufficient": result.is_sufficient,
-        "knowledge_gap": result.knowledge_gap,
-        "follow_up_queries": result.follow_up_queries,
-        "research_loop_count": state["research_loop_count"],
-        "number_of_ran_queries": len(state["search_query"]),
-    }
+    
+    try:
+        result = llm.with_structured_output(Reflection).invoke(formatted_prompt)
+        
+        # Ensure follow_up_queries is always a list
+        follow_up_queries = result.follow_up_queries if hasattr(result, 'follow_up_queries') else []
+        if not isinstance(follow_up_queries, list):
+            follow_up_queries = []
+        
+        return {
+            "is_sufficient": result.is_sufficient if hasattr(result, 'is_sufficient') else True,
+            "knowledge_gap": result.knowledge_gap if hasattr(result, 'knowledge_gap') else "No additional information needed",
+            "follow_up_queries": follow_up_queries,
+            "research_loop_count": state["research_loop_count"],
+            "number_of_ran_queries": len(state["search_query"]),
+        }
+    except Exception as e:
+        print("reflection Error occurred")
+        return {
+            "is_sufficient": True,
+            "knowledge_gap": "Error occurred during reflection",
+            "follow_up_queries": [],
+            "research_loop_count": state["research_loop_count"],
+            "number_of_ran_queries": len(state["search_query"]),
+        }
 
 
 def evaluate_research(
@@ -215,6 +250,12 @@ def evaluate_research(
     if state["is_sufficient"] or state["research_loop_count"] >= max_research_loops:
         return ["finalize_answer"]
     else:
+        # Ensure follow_up_queries is a list and not None
+        follow_up_queries = state.get("follow_up_queries", [])
+        if not isinstance(follow_up_queries, list) or not follow_up_queries:
+            # If no follow-up queries or invalid data, finalize the answer
+            return ["finalize_answer"]
+        
         return [
             Send(
                 "web_research",
@@ -223,7 +264,7 @@ def evaluate_research(
                     "id": state["number_of_ran_queries"] + int(idx),
                 },
             )
-            for idx, follow_up_query in enumerate(state["follow_up_queries"])
+            for idx, follow_up_query in enumerate(follow_up_queries)
         ]
 
 
