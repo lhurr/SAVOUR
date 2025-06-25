@@ -77,6 +77,9 @@ export default function SignupScreen() {
             style={styles.button}
           />
         </View>
+        
+        {/* Spacer to match login page layout */}
+        <View style={styles.spacer} />
       </View>
     </View>
   );
@@ -132,5 +135,8 @@ const styles = StyleSheet.create({
   },
   error: {
     marginBottom: spacing.md,
+  },
+  spacer: {
+    height: spacing.md + spacing.xs + 23
   },
 });

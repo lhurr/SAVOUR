@@ -1,32 +1,45 @@
 import React, { useState } from 'react';
-import { View, TextInput, StyleSheet } from 'react-native';
+import { View, TextInput, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Button } from '../../components/ui/Button';
 import { Text } from '../../components/ui/Typography';
 import { colors, spacing, typography, borderRadius, mixins } from '../../constants/theme';
 import { supabase } from '../../lib/supabase';
 
-export default function LoginScreen() {
+export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState(false);
   const router = useRouter();
 
-  async function handleLogin() {
+  async function handleResetPassword() {
+    if (!email.trim()) {
+      Alert.alert('Email Required', 'Please enter your email address to reset your password.');
+      return;
+    }
+
+    setIsResettingPassword(true);
+    setResetSuccess(false);
+
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
       });
 
       if (error) {
-        setErrorMsg(error.message);
+        Alert.alert('Error', error.message);
       } else {
-        setErrorMsg('');
-        router.replace('/');
+        setResetSuccess(true);
+        Alert.alert(
+          'Password Reset Email Sent',
+          'Check your email for a link to reset your password.',
+          [{ text: 'OK' }]
+        );
       }
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : 'An error occurred');
+      Alert.alert('Error', err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsResettingPassword(false);
     }
   }
 
@@ -36,7 +49,15 @@ export default function LoginScreen() {
         <Text variant="h3" center style={styles.tagline}>Find your next go-to grub with</Text>
         <Text variant="h1" color={colors.primary} style={styles.logoText}>SAVOUR</Text>
       </View>
+      
       <View style={styles.formContainer}>
+        <Text variant="h3" center style={styles.subtitle}>
+          Reset Your Password
+        </Text>
+        <Text variant="caption" center style={styles.description}>
+          Enter your email address and we'll send you a link to reset your password.
+        </Text>
+        
         <TextInput
           placeholder="Email"
           placeholderTextColor={colors.text.secondary.dark}
@@ -46,44 +67,30 @@ export default function LoginScreen() {
           keyboardType="email-address"
           autoCapitalize="none"
         />
-        <TextInput
-          placeholder="Password"
-          placeholderTextColor={colors.text.secondary.dark}
-          style={styles.input}
-          onChangeText={setPassword}
-          value={password}
-          secureTextEntry
-        />
-        {!!errorMsg && (
-          <Text variant="caption" color={colors.error} center style={styles.error}>
-            {errorMsg}
+        
+        {resetSuccess && (
+          <Text variant="caption" color={colors.success} center style={styles.success}>
+            Password reset email sent! Check your inbox.
           </Text>
         )}
         
         <View style={styles.buttonContainer}>
           <Button
-            title="Log In"
-            onPress={handleLogin}
+            title="Back to Login"
+            onPress={() => router.push('/login')}
+            variant="outline"
+            size="medium"
+            style={styles.button}
+            textStyle={styles.buttonText}
+          />
+          <Button
+            title={isResettingPassword ? "Sending..." : "Reset Password"}
+            onPress={handleResetPassword}
             variant="primary"
-            size="large"
+            size="medium"
             style={styles.button}
-          />
-          <Button
-            title="Sign Up"
-            onPress={() => router.push('./signup')}
-            variant="outline"
-            size="large"
-            style={styles.button}
-          />
-        </View>
-
-        <View style={styles.forgotPasswordContainer}>
-          <Button
-            title="Forgot your password?"
-            onPress={() => router.push('./forgotpassword')}
-            variant="outline"
-            size="small"
-            style={styles.forgotPasswordButton}
+            textStyle={styles.buttonText}
+            disabled={isResettingPassword}
           />
         </View>
       </View>
@@ -118,13 +125,25 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     alignItems: 'center',
   },
+  subtitle: {
+    fontSize: typography.sizes.lg,
+    marginBottom: spacing.sm,
+    color: colors.text.primary.dark,
+  },
+  description: {
+    fontSize: typography.sizes.md,
+    marginBottom: spacing.lg,
+    color: colors.text.secondary.dark,
+    textAlign: 'center',
+    paddingHorizontal: spacing.md,
+  },
   input: {
     width: '80%',
     borderWidth: 1,
     borderColor: colors.border.dark,
     borderRadius: borderRadius.md,
     padding: spacing.md,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.lg,
     backgroundColor: colors.surface.dark,
     color: colors.text.primary.dark,
     fontSize: typography.sizes.md,
@@ -134,19 +153,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.sm,
     width: '80%',
-    marginTop: spacing.xs,
   },
   button: {
     flex: 1,
   },
-  error: {
+  success: {
     marginBottom: spacing.md,
   },
-  forgotPasswordContainer: {
-    marginTop: spacing.md,
-    alignItems: 'center',
+  buttonText: {
+    textAlign: 'center',
   },
-  forgotPasswordButton: {
-    paddingVertical: spacing.xs,
-  },
-});
+}); 

@@ -24,6 +24,7 @@ export const colors = {
     },
   },
   error: '#FF4444',
+  success: '#4CAF50',
 };
 
 export const spacing = {
