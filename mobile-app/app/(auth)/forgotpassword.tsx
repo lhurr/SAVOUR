@@ -84,7 +84,7 @@ export default function ForgotPasswordScreen() {
             textStyle={styles.buttonText}
           />
           <Button
-            title={isResettingPassword ? "Sending..." : "Reset Password"}
+            title={isResettingPassword ? "Sending..." : "Send Reset Email"}
             onPress={handleResetPassword}
             variant="primary"
             size="medium"
@@ -93,6 +93,15 @@ export default function ForgotPasswordScreen() {
             disabled={isResettingPassword}
           />
         </View>
+        
+        {/* Debug info for development */}
+        {__DEV__ && (
+          <View style={styles.debugContainer}>
+            <Text variant="caption" center style={styles.debugText}>
+              Debug: Redirect URL will be: {`${window.location.origin}/reset-password`}
+            </Text>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -162,5 +171,14 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     textAlign: 'center',
+  },
+  debugContainer: {
+    marginTop: spacing.md,
+    padding: spacing.md,
+    backgroundColor: colors.surface.dark,
+    borderRadius: borderRadius.md,
+  },
+  debugText: {
+    color: colors.text.secondary.dark,
   },
 }); 
