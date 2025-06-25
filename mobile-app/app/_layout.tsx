@@ -32,12 +32,13 @@ const useProtectedRoute = () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         const isAuthRoute = segments[0] === '(auth)';
+        const isResetPasswordRoute = segments[1] === 'reset-password';
 
         if (!session && !isAuthRoute) {
           // If no session and not on auth route, redirect to login
           router.replace('/(auth)/login');
-        } else if (session && isAuthRoute) {
-          // If has session and on auth route, redirect to home
+        } else if (session && isAuthRoute && !isResetPasswordRoute) {
+          // If has session and on auth route (but not reset-password), redirect to home
           router.replace('/(tabs)');
         }
       } finally {
