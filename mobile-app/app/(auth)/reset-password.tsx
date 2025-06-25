@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, StyleSheet, Alert } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Button } from '../../components/ui/Button';
 import { Text } from '../../components/ui/Typography';
 import { colors, spacing, typography, borderRadius, mixins } from '../../constants/theme';
@@ -11,18 +11,36 @@ export default function ResetPasswordScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isResetting, setIsResetting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [isValidSession, setIsValidSession] = useState(false);
   const router = useRouter();
-  const params = useLocalSearchParams();
 
-  // Check if we have the necessary tokens from the URL
+  // Check if user has a valid session (Supabase handles the verification)
   useEffect(() => {
-    // The URL should contain access_token and refresh_token from Supabase
-    if (!params.access_token) {
-      setErrorMsg('Invalid or expired reset link. \n Please request a new password reset.');
-    }
-  }, [params]);
+    const checkSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error || !session) {
+          setErrorMsg('Invalid or expired reset link. Please request a new password reset.');
+          return;
+        }
+
+        setIsValidSession(true);
+        setErrorMsg('');
+      } catch (err) {
+        setErrorMsg('Invalid or expired reset link. Please request a new password reset.');
+      }
+    };
+
+    checkSession();
+  }, []);
 
   async function handleResetPassword() {
+    if (!isValidSession) {
+      setErrorMsg('Invalid or expired reset link. Please request a new password reset.');
+      return;
+    }
+
     if (!password.trim()) {
       setErrorMsg('Please enter a new password.');
       return;
@@ -33,21 +51,15 @@ export default function ResetPasswordScreen() {
       return;
     }
 
+    if (password.length < 6) {
+      setErrorMsg('Password must be at least 6 characters long.');
+      return;
+    }
+
     setIsResetting(true);
     setErrorMsg('');
 
     try {
-      // Set the session using the tokens from the URL
-      const { error: sessionError } = await supabase.auth.setSession({
-        access_token: params.access_token as string,
-        refresh_token: params.refresh_token as string,
-      });
-
-      if (sessionError) {
-        setErrorMsg('Invalid or expired reset link. Please request a new password reset.');
-        return;
-      }
-
       // Update the password
       const { error } = await supabase.auth.updateUser({
         password: password,
@@ -129,7 +141,7 @@ export default function ResetPasswordScreen() {
             size="medium"
             style={styles.button}
             textStyle={styles.buttonText}
-            disabled={isResetting}
+            disabled={isResetting || !isValidSession}
           />
         </View>
       </View>
