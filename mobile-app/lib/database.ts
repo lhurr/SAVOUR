@@ -112,15 +112,32 @@ export class RestaurantService {
       throw new Error('User not authenticated');
     }
 
-    // Check if already favorited
-    const { data: existing } = await supabase
+    // at least one identifier
+    if (!restaurantName && !restaurantAddress) {
+      throw new Error('At least restaurant name or address is required');
+    }
+
+    // query based on available data
+    let query = supabase
       .from(TABLES.USER_RESTAURANT_INTERACTIONS)
       .select()
       .eq('user_id', user.id)
-      .eq('restaurant_name', restaurantName)
-      .eq('restaurant_address', restaurantAddress)
-      .eq('interaction_type', 'favorite')
-      .single();
+      .eq('interaction_type', 'favorite');
+
+    if (restaurantName && restaurantAddress) {
+      // exact match
+      query = query
+        .eq('restaurant_name', restaurantName)
+        .eq('restaurant_address', restaurantAddress);
+    } else if (restaurantName) {
+      // match by name
+      query = query.eq('restaurant_name', restaurantName);
+    } else if (restaurantAddress) {
+      // match by address
+      query = query.eq('restaurant_address', restaurantAddress);
+    }
+
+    const { data: existing } = await query.single();
 
     if (existing) {
       const { error } = await supabase
@@ -136,15 +153,22 @@ export class RestaurantService {
       return { isFavorite: false };
     } else {
       // add to favorites
+      const insertData: any = {
+        user_id: user.id,
+        interaction_type: 'favorite',
+        interaction_date: new Date().toISOString()
+      };
+
+      if (restaurantName) {
+        insertData.restaurant_name = restaurantName;
+      }
+      if (restaurantAddress) {
+        insertData.restaurant_address = restaurantAddress;
+      }
+
       const { data, error } = await supabase
         .from(TABLES.USER_RESTAURANT_INTERACTIONS)
-        .insert({
-          user_id: user.id,
-          restaurant_name: restaurantName,
-          restaurant_address: restaurantAddress,
-          interaction_type: 'favorite',
-          interaction_date: new Date().toISOString()
-        })
+        .insert(insertData)
         .select()
         .single();
 
@@ -166,7 +190,7 @@ export class RestaurantService {
 
     const { data, error } = await supabase
       .from(TABLES.USER_RESTAURANT_INTERACTIONS)
-      .select('interaction_type, restaurant_name')
+      .select('interaction_type, restaurant_name, restaurant_address')
       .eq('user_id', user.id);
 
     if (error) {
@@ -178,7 +202,7 @@ export class RestaurantService {
       total_clicks: data.filter(d => d.interaction_type === 'click').length,
       total_views: data.filter(d => d.interaction_type === 'view').length,
       total_favorites: data.filter(d => d.interaction_type === 'favorite').length,
-      unique_restaurants: new Set(data.map(d => `${d.restaurant_name}-${d.restaurant_address}`)).size
+      unique_restaurants: new Set(data.map(d => `${d.restaurant_name}-${d.restaurant_address || ''}`)).size
     };
 
     return stats;
