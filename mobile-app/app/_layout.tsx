@@ -31,15 +31,19 @@ const useProtectedRoute = () => {
     const checkAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        const isAuthRoute = segments[0] === '(auth)';
-        const isResetPasswordRoute = segments[1] === 'reset-password';
+        const isAuthRoute = segments.length > 0 && segments[0] === '(auth)';
+        const isTabsRoute = segments.length > 0 && segments[0] === '(tabs)';
+        let isResetPasswordRoute = false;
+        if (segments.length > 1) {
+          isResetPasswordRoute = segments[1] === 'reset-password';
+        }
 
-        if (!session && !isAuthRoute) {
-          // If no session and not on auth route, redirect to login
+        if (!session && isTabsRoute) {
+          // If no session and trying to access tabs, redirect to login
           router.replace('/(auth)/login');
         } else if (session && isAuthRoute && !isResetPasswordRoute) {
-          // If has session and on auth route (but not reset-password), redirect to home
-          router.replace('/(tabs)');
+          // If has session and on auth route (but not reset-password), redirect to home tab
+          router.replace('/(tabs)/home');
         }
       } finally {
         setIsLoading(false);

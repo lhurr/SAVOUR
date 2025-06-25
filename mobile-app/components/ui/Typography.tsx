@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
   },
   h1: {
     fontSize: typography.sizes.xxxl,
-    fontWeight: '700' as const,
+    fontWeight: '800' as const,
     letterSpacing: 2,
   },
   h2: {

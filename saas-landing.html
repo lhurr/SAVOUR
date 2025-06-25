@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAVOUR - AI-Powered Restaurant Discovery</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --savour-green: #19C37D;
+            --primary-bg: #181A20;
+            --surface-bg: rgba(36, 37, 46, 0.85);
+            --border-glass: rgba(255,255,255,0.08);
+            --text-main: #F3F4F6;
+            --text-secondary: #A1A1AA;
+            --accent-gradient: linear-gradient(135deg, #19C37D 0%, #0F7A4D 100%);
+        }
+        html {
+            background: var(--primary-bg);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary-bg);
+            color: var(--text-main);
+        }
+        .glass {
+            background: var(--surface-bg);
+            border: 1.5px solid var(--border-glass);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 1.5rem;
+        }
+        .savour-green {
+            color: var(--savour-green) !important;
+        }
+        .savour-bg {
+            background: var(--savour-green) !important;
+            color: #fff !important;
+        }
+        .gradient-text {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+        .hero-bg {
+            background: radial-gradient(ellipse at 60% 40%, #19C37D22 0%, #181A20 80%);
+        }
+        .btn-glass {
+            @apply px-8 py-4 rounded-xl font-semibold text-lg shadow-lg transition duration-300;
+            background: var(--surface-bg);
+            border: 1.5px solid var(--border-glass);
+            color: var(--savour-green);
+        }
+        .btn-glass:hover {
+            background: var(--savour-green);
+            color: #fff;
+            border-color: var(--savour-green);
+        }
+        .icon-glass {
+            background: var(--surface-bg);
+            border-radius: 9999px;
+            padding: 1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px 0 rgba(25, 195, 125, 0.10);
+            border: 1.5px solid var(--border-glass);
+            color: var(--savour-green);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        .glass-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .glass-card:hover {
+            transform: translateY(-6px) scale(1.03);
+            box-shadow: 0 12px 32px 0 rgba(25, 195, 125, 0.10);
+            border-color: var(--savour-green);
+        }
+        .testimonial-quote {
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 9999px;
+            background: var(--savour-green);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+        .footer-link {
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+        .footer-link:hover {
+            color: var(--savour-green);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="glass fixed top-0 left-0 w-full z-50 py-4 px-0" style="backdrop-filter: blur(16px);">
+        <div class="max-w-7xl mx-auto flex justify-between items-center px-6">
+            <div class="text-2xl font-extrabold tracking-tight savour-green">SAVOUR</div>
+            <div class="hidden md:flex space-x-8 text-base">
+                <a href="#problem" class="footer-link">Why SAVOUR?</a>
+                <a href="#features" class="footer-link">Features</a>
+                <a href="#how" class="footer-link">How It Works</a>
+                <a href="#testimonials" class="footer-link">Testimonials</a>
+                <a href="#download" class="footer-link">Download</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg min-h-screen flex items-center justify-center pt-32 pb-16">
+        <div class="max-w-3xl mx-auto text-center">
+            <h1 class="text-5xl md:text-6xl font-extrabold mb-6">
+                Discover Where Taste Meets Technology
+            </h1>
+            <p class="text-xl md:text-2xl mb-10 text-gray-300">
+                <span class="savour-green font-bold">SAVOUR</span> is an innovative cross-platform app that helps you find new restaurants based on your unique taste profile, preferences, and geolocation—powered by cutting-edge LLM recommendation engines and interactive map technology.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+                <a href="#download" class="btn-glass"><i class="fab fa-apple mr-2"></i>Download for iOS</a>
+                <a href="#download" class="btn-glass"><i class="fab fa-google-play mr-2"></i>Download for Android</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem & Solution Section -->
+    <section id="problem" class="py-24">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="glass p-10 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold mb-6">Why <span class="savour-green">SAVOUR</span>?</h2>
+                <p class="text-lg md:text-xl mb-6 text-gray-300">
+                    In today's fast-paced world, choosing where and what to eat has become an increasingly frustrating experience. Many individuals find themselves repeatedly visiting the same restaurants and cafes, not out of preference, but due to the overwhelming number of choices and lack of personalized guidance. This decision fatigue often leads to missed opportunities to explore new culinary experiences, hidden gems, or trending hotspots.
+                </p>
+                <p class="text-lg md:text-xl text-gray-300">
+                    <span class="savour-green font-semibold">SAVOUR</span> addresses this gap with a smarter, more intuitive solution that understands your tastes, leverages your past behavior, and considers real-time location data to deliver meaningful, personalized dining recommendations.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-24">
+        <div class="max-w-6xl mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-16">Features</h2>
+            <div class="grid md:grid-cols-3 gap-10">
+                <div class="glass glass-card p-8 text-center">
+                    <div class="icon-glass"><i class="fas fa-map-marked-alt"></i></div>
+                    <h3 class="text-xl font-semibold mb-3">Map-based Restaurant Locator</h3>
+                    <p class="text-gray-400">Explore an interactive map powered by OpenStreetMap. See all nearby food & beverage spots within a configurable radius, filter in real-time, and navigate seamlessly.</p>
+                </div>
+                <div class="glass glass-card p-8 text-center">
+                    <div class="icon-glass"><i class="fas fa-robot"></i></div>
+                    <h3 class="text-xl font-semibold mb-3">Restaurant Deep Research Agentic AI</h3>
+                    <p class="text-gray-400">Our agentic AI system leverages deep web search and reflection to extract and analyze restaurant info—food recommendations, promotions, dietary options—so you can make informed choices.</p>
+                </div>
+                <div class="glass glass-card p-8 text-center">
+                    <div class="icon-glass"><i class="fas fa-comments"></i></div>
+                    <h3 class="text-xl font-semibold mb-3">Conversational Search with LLM</h3>
+                    <p class="text-gray-400">Use natural language prompts to search for restaurants by dietary needs, budget, cuisine, and more. Our LLM-powered semantic search makes discovery intuitive and personal.</p>
+                </div>
+                <div class="glass glass-card p-8 text-center">
+                    <div class="icon-glass"><i class="fas fa-user-shield"></i></div>
+                    <h3 class="text-xl font-semibold mb-3">User Access Management</h3>
+                    <p class="text-gray-400">Secure registration and login with Supabase. A public landing page guides new users through onboarding and app access.</p>
+                </div>
+                <div class="glass glass-card p-8 text-center">
+                    <div class="icon-glass"><i class="fas fa-home"></i></div>
+                    <h3 class="text-xl font-semibold mb-3">Homepage Recommender</h3>
+                    <p class="text-gray-400">Get tailored dining suggestions on your homepage, based on your previous activity and preferences. Quick, relevant, and always fresh.</p>
+                </div>
+                <div class="glass glass-card p-8 text-center">
+                    <div class="icon-glass"><i class="fas fa-user-cog"></i></div>
+                    <h3 class="text-xl font-semibold mb-3">Profile & Personalisation Control</h3>
+                    <p class="text-gray-400">Customize your experience with a dedicated profile panel. Set dietary needs, cuisine preferences, and memory settings to supercharge your recommendations.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how" class="py-24">
+        <div class="max-w-5xl mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-16">How <span class="savour-green">SAVOUR</span> Works</h2>
+            <div class="grid md:grid-cols-3 gap-10">
+                <div class="glass p-8 text-center">
+                    <div class="icon-glass"><i class="fas fa-sliders-h"></i></div>
+                    <h3 class="text-lg font-semibold mb-2">Personalize Your Profile</h3>
+                    <p class="text-gray-400">Set your dietary needs, cuisine preferences, and more to build your unique taste profile.</p>
+                </div>
+                <div class="glass p-8 text-center">
+                    <div class="icon-glass"><i class="fas fa-map"></i></div>
+                    <h3 class="text-lg font-semibold mb-2">Explore the Map</h3>
+                    <p class="text-gray-400">Browse nearby restaurants on an interactive map, filter in real-time, and discover new places.</p>
+                </div>
+                <div class="glass p-8 text-center">
+                    <div class="icon-glass"><i class="fas fa-comments"></i></div>
+                    <h3 class="text-lg font-semibold mb-2">Chat & Get Recommendations</h3>
+                    <p class="text-gray-400">Use conversational search to ask for suggestions, get deep research, and enjoy personalized picks.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="py-24">
+        <div class="max-w-6xl mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-16">What Our Users Say</h2>
+            <div class="grid md:grid-cols-3 gap-10">
+                <div class="glass p-8">
+                    <div class="flex items-center mb-4">
+                        <div class="avatar">S</div>
+                        <div>
+                            <div class="font-semibold">Sarah Chen</div>
+                            <div class="text-sm text-gray-400">Food Blogger</div>
+                        </div>
+                    </div>
+                    <div class="testimonial-quote">“SAVOUR's map and AI search helped me find amazing new places I'd never have discovered on my own!”</div>
+                </div>
+                <div class="glass p-8">
+                    <div class="flex items-center mb-4">
+                        <div class="avatar">M</div>
+                        <div>
+                            <div class="font-semibold">Mike Rodriguez</div>
+                            <div class="text-sm text-gray-400">Tech Professional</div>
+                        </div>
+                    </div>
+                    <div class="testimonial-quote">“The conversational search is a game changer. I just tell SAVOUR what I'm craving and it delivers!”</div>
+                </div>
+                <div class="glass p-8">
+                    <div class="flex items-center mb-4">
+                        <div class="avatar">A</div>
+                        <div>
+                            <div class="font-semibold">Alex Thompson</div>
+                            <div class="text-sm text-gray-400">Local Explorer</div>
+                        </div>
+                    </div>
+                    <div class="testimonial-quote">“I love how SAVOUR remembers my preferences and always has new suggestions ready.”</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section id="download" class="py-24">
+        <div class="max-w-3xl mx-auto text-center">
+            <h2 class="text-4xl font-bold mb-6">Ready to Experience Smarter Dining?</h2>
+            <p class="text-xl mb-10 text-gray-300">
+                Join thousands of food lovers who have already discovered their new favorite restaurants with <span class="savour-green">SAVOUR</span>.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#" class="btn-glass"><i class="fab fa-apple mr-2"></i>Download for iOS</a>
+                <a href="#" class="btn-glass"><i class="fab fa-google-play mr-2"></i>Download for Android</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12" style="background:rgba(24,26,32,0.98); border-top: 1.5px solid var(--border-glass);">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="text-2xl font-extrabold savour-green mb-4 md:mb-0">SAVOUR</div>
+                <div class="flex space-x-6 text-base">
+                    <a href="#problem" class="footer-link">Why SAVOUR?</a>
+                    <a href="#features" class="footer-link">Features</a>
+                    <a href="#how" class="footer-link">How It Works</a>
+                    <a href="#testimonials" class="footer-link">Testimonials</a>
+                    <a href="#download" class="footer-link">Download</a>
+                </div>
+            </div>
+            <div class="text-center text-gray-500 mt-8 text-sm">
+                &copy; 2024 <span class="savour-green">SAVOUR</span> by BiteDunce. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href.length > 1 && document.querySelector(href)) {
+                    e.preventDefault();
+                    document.querySelector(href).scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html> 
