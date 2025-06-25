@@ -129,13 +129,11 @@ def web_research(state: WebSearchState, config: RunnableConfig) -> OverallState:
             },
         )
         
-        # Check if response has the expected structure
         if not response or not response.candidates or len(response.candidates) == 0:
             raise ValueError("Invalid response from Gemini API")
             
         candidate = response.candidates[0]
         if not hasattr(candidate, 'grounding_metadata') or not candidate.grounding_metadata:
-            # Fallback: return response without citations
             modified_text = response.text
             sources_gathered = []
         else:
@@ -143,7 +141,7 @@ def web_research(state: WebSearchState, config: RunnableConfig) -> OverallState:
             resolved_urls = resolve_urls(
                 candidate.grounding_metadata.grounding_chunks, state["id"]
             )
-            # Gets the citations and adds them to the generated text
+            # citations
             citations = get_citations(response, resolved_urls)
             modified_text = insert_citation_markers(response.text, citations)
             sources_gathered = [item for citation in citations for item in citation["segments"]]
@@ -217,8 +215,7 @@ def reflection(state: OverallState, config: RunnableConfig) -> ReflectionState:
             "number_of_ran_queries": len(state["search_query"]),
         }
     except Exception as e:
-        # Fallback in case of any error
-        print(f"Error in reflection: {e}")
+        print("reflection Error occurred")
         return {
             "is_sufficient": True,
             "knowledge_gap": "Error occurred during reflection",

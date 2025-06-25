@@ -91,7 +91,7 @@ export default function RestaurantInfo() {
               messages: [
                 {
                   role: "human",
-                  content: `Research about ${name || ''}${address ? ` located at ${address}` : ''}. Provide food and user reviews, what the menu entails, and the price range.`
+                  content: `Research about ${name || ''} restaurant/amenity ${address ? ` located at ${address}` : ''}. Provide food and user reviews, what the menu entails, and the price range.`
                 }
               ],
               configurable: {
