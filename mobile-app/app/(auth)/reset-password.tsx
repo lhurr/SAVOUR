@@ -12,6 +12,7 @@ export default function ResetPasswordScreen() {
   const [isResetting, setIsResetting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [isValidSession, setIsValidSession] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const router = useRouter();
 
   // Check if user has a valid session (Supabase handles the verification)
@@ -68,6 +69,7 @@ export default function ResetPasswordScreen() {
       if (error) {
         setErrorMsg(error.message);
       } else {
+        setIsSuccess(true);
         Alert.alert(
           'Password Reset Successful',
           'Your password has been updated successfully. You can now log in with your new password.',
@@ -125,6 +127,12 @@ export default function ResetPasswordScreen() {
           </Text>
         )}
         
+        {isSuccess && (
+          <Text variant="caption" color={colors.success} center style={styles.success}>
+            Password updated successfully! You can now log in with your new password.
+          </Text>
+        )}
+        
         <View style={styles.buttonContainer}>
           <Button
             title="Back to Login"
@@ -141,7 +149,7 @@ export default function ResetPasswordScreen() {
             size="medium"
             style={styles.button}
             textStyle={styles.buttonText}
-            disabled={isResetting || !isValidSession}
+            disabled={isResetting || !isValidSession || isSuccess}
           />
         </View>
       </View>
@@ -213,6 +221,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   error: {
+    marginBottom: spacing.md,
+  },
+  success: {
     marginBottom: spacing.md,
   },
 }); 
