@@ -13,6 +13,7 @@ interface Place {
   link: string;
   cuisine?: string;
   address?: string;
+  town?: string;
   website?: string;
 }
 
@@ -26,28 +27,66 @@ export default function MapScreen() {
   const [mapLoading, setMapLoading] = useState(true);
   const [radius, setRadius] = useState(500); // Default 500m
   const [showFilter, setShowFilter] = useState(false);
+  const [userTown, setUserTown] = useState<string>('');
+
+  const getTownFromCoordinates = async (latitude: number, longitude: number): Promise<string> => {
+    try {
+      const response = await fetch(
+        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
+      const data = await response.json();
+      const location = data.locality || data.city || data.principalSubdivision || 'Current Location';
+      // console.log(data.principalSubdivision)
+
+      return location;
+    } catch (error) {
+      return 'Current Location';
+    }
+  };
 
   useEffect(() => {
     (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission denied', 'Location permission is required to use this feature.');
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Permission denied', 'Location permission is required to use this feature.');
+          setLoading(false);
+          return;
+        }
+
+        let currentLocation = await Location.getCurrentPositionAsync({});
+        setLocation(currentLocation);
+
+        let town = 'Current Location'; 
+        try {
+          town = await getTownFromCoordinates(
+            currentLocation.coords.latitude, 
+            currentLocation.coords.longitude
+          );
+        } catch (error) {
+          console.warn('Failed to get town name, using default:', error);
+        }
+        setUserTown(town);
+
+        fetchNearbyPlaces(currentLocation.coords.latitude, currentLocation.coords.longitude, town);
+      } catch (error) {
+        // console.error('Error in location setup:', error);
+        Alert.alert('Error', 'Failed to get your location, check your location settings.');
         setLoading(false);
-        return;
       }
-
-      let currentLocation = await Location.getCurrentPositionAsync({});
-      setLocation(currentLocation);
-
-      fetchNearbyPlaces(currentLocation.coords.latitude, currentLocation.coords.longitude);
     })();
   }, []);
 
   useEffect(() => {
-    if (location) {
-      fetchNearbyPlaces(location.coords.latitude, location.coords.longitude);
+    if (location && userTown) {
+      fetchNearbyPlaces(location.coords.latitude, location.coords.longitude, userTown);
     }
-  }, [radius]);
+  }, [radius, userTown]);
 
   useEffect(() => {
     if ((Platform.OS === 'web' || Platform.OS === 'ios') && location) {
@@ -94,14 +133,14 @@ export default function MapScreen() {
                   <div>
                     <strong>{place.name}</strong><br />
                     {place.cuisine && <span>Cuisine: {place.cuisine}<br /></span>}
-                    {place.address && <span>Address: {place.address}<br /></span>}
+                    {(place.address || place.town) && <span>Address: {place.address || place.town}<br /></span>}
                     {place.website && <a href={place.website} target="_blank" rel="noopener noreferrer">Website</a>}<br />
                     <a href={place.link} target="_blank" rel="noopener noreferrer">Source Link</a><br />
                     <a 
                       href="#" 
                       onClick={(e) => {
                         e.preventDefault();
-                        handleInfoPress(place.name, place.address || '', place.cuisine);
+                        handleInfoPress(place.name, place.address || place.town || '', place.cuisine);
                       }}
                       style={{ color: 'green', fontWeight: 'bold', textDecoration: 'none' }}
                     >
@@ -122,23 +161,27 @@ export default function MapScreen() {
     }
   }, [location, places]);
 
-  const fetchNearbyPlaces = async (latitude: number, longitude: number) => {
+  const fetchNearbyPlaces = async (latitude: number, longitude: number, town: string) => {
     const query = `[out:json];(node["amenity"~"restaurant|cafe|fast_food|bar|pub"](around:${radius},${latitude},${longitude}););out;`;
     const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
 
     try {
       const response = await fetch(url);
       const data = await response.json();
-      const fetchedPlaces = data.elements.map((el: any) => ({
-        id: el.id.toString(),
-        name: el.tags.name || 'Unnamed',
-        lat: el.lat,
-        lon: el.lon,
-        link: url,
-        cuisine: el.tags.cuisine,
-        address: el.tags['addr:street'] ? `${el.tags['addr:housenumber'] || ''} ${el.tags['addr:street']}`.trim() : undefined,
-        website: el.tags.website,
-      }));
+      const fetchedPlaces = data.elements.map((el: any) => {
+        const address = el.tags['addr:street'] ? `${el.tags['addr:housenumber'] || ''} ${el.tags['addr:street']}`.trim() : undefined;
+        return {
+          id: el.id.toString(),
+          name: el.tags.name || 'Unnamed',
+          lat: el.lat,
+          lon: el.lon,
+          link: url,
+          cuisine: el.tags.cuisine,
+          address: address || town,
+          town: town,
+          website: el.tags.website,
+        };
+      });
       setPlaces(fetchedPlaces);
     } catch (error) {
       Alert.alert('Error', error as string);
@@ -151,7 +194,7 @@ export default function MapScreen() {
     try {
       await RestaurantService.recordInteraction(
         placeName,
-        address || '',
+        address,
         cuisine || '',
         'click'
       );
@@ -274,7 +317,7 @@ export default function MapScreen() {
               <View style={styles.calloutContainer}>
                 <Text style={styles.calloutTitle}>{place.name}</Text>
                 {place.cuisine && <Text>Cuisine: {place.cuisine}</Text>}
-                {place.address && <Text>Address: {place.address}</Text>}
+                {(place.address || place.town) && <Text>Address: {place.address || place.town}</Text>}
                 {place.website && (
                   <Text style={styles.link} onPress={() => place.website && Linking.openURL(place.website)}>
                     Website
@@ -283,7 +326,7 @@ export default function MapScreen() {
                 <Text style={styles.link} onPress={() => Linking.openURL(place.link)}>
                   Source Link
                 </Text>
-                <Pressable onPress={() => handleInfoPress(place.name, place.address || '', place.cuisine)}>
+                <Pressable onPress={() => handleInfoPress(place.name, place.address || place.town || '', place.cuisine)}>
                   <Text style={styles.infoLink}>Find out more!</Text>
                 </Pressable>
               </View>
