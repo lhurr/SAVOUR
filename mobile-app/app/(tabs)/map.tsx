@@ -17,6 +17,15 @@ interface Place {
   website?: string;
 }
 
+const AMENITY_TYPES = [
+  { label: 'All', value: 'all' },
+  { label: 'Restaurant', value: 'restaurant' },
+  { label: 'Cafe', value: 'cafe' },
+  { label: 'Fast Food', value: 'fast_food' },
+  { label: 'Bar', value: 'bar' },
+  { label: 'Pub', value: 'pub' },
+];
+
 // https://github.com/react-native-maps/react-native-maps, RENDEER using leaflet
 export default function MapScreen() {
   const router = useRouter();
@@ -28,6 +37,8 @@ export default function MapScreen() {
   const [radius, setRadius] = useState(500); // Default 500m
   const [showFilter, setShowFilter] = useState(false);
   const [userTown, setUserTown] = useState<string>('');
+  const [amenityFilter, setAmenityFilter] = useState<string>('all');
+  const [showAmenityDropdown, setShowAmenityDropdown] = useState(false);
 
   const getTownFromCoordinates = async (latitude: number, longitude: number): Promise<string> => {
     try {
@@ -86,7 +97,7 @@ export default function MapScreen() {
     if (location && userTown) {
       fetchNearbyPlaces(location.coords.latitude, location.coords.longitude, userTown);
     }
-  }, [radius, userTown]);
+  }, [radius, userTown, amenityFilter]);
 
   useEffect(() => {
     if ((Platform.OS === 'web' || Platform.OS === 'ios') && location) {
@@ -131,20 +142,38 @@ export default function MapScreen() {
               <Marker key={place.id} position={[place.lat, place.lon]} icon={redDotIcon}>
                 <Popup>
                   <div>
-                    <strong>{place.name}</strong><br />
-                    {place.cuisine && <span>Cuisine: {place.cuisine}<br /></span>}
+                    <strong style={{ fontSize: '18px', display: 'block', textAlign: 'center', marginBottom: (place.cuisine || place.address || place.town || place.website) ? '4px' : '0' }}>{place.name}</strong>
+                    {place.cuisine && <span>Cuisine: {place.cuisine.split(';').map(c => c.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())).join(', ')}<br /></span>}
+                    {(place.cuisine && (place.address || place.town)) && ''}
                     {(place.address || place.town) && <span>Address: {place.address || place.town}<br /></span>}
-                    {place.website && <a href={place.website} target="_blank" rel="noopener noreferrer">Website</a>}<br />
-                    <a href={place.link} target="_blank" rel="noopener noreferrer">Source Link</a><br />
+                    {((place.cuisine || place.address || place.town) && place.website) && ''}
+                    {place.website && <a href={place.website} target="_blank" rel="noopener noreferrer">Website</a>}
                     <a 
                       href="#" 
                       onClick={(e) => {
                         e.preventDefault();
                         handleInfoPress(place.name, place.address || place.town || '', place.cuisine);
                       }}
-                      style={{ color: 'green', fontWeight: 'bold', textDecoration: 'none' }}
+                      style={{
+                        background: '#007AFF',
+                        color: 'white',
+                        fontWeight: '600',
+                        fontSize: '15px',
+                        padding: '8px 18px',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        marginTop: '10px',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                        transition: 'background 0.2s',
+                        display: 'block',
+                        marginLeft: 'auto',
+                        marginRight: 'auto',
+                        textDecoration: 'none',
+                        textAlign: 'center',
+                      }}
                     >
-                      Find out more!
+                      View Details
                     </a>
                   </div>
                 </Popup>
@@ -162,7 +191,13 @@ export default function MapScreen() {
   }, [location, places]);
 
   const fetchNearbyPlaces = async (latitude: number, longitude: number, town: string) => {
-    const query = `[out:json];(node["amenity"~"restaurant|cafe|fast_food|bar|pub"](around:${radius},${latitude},${longitude}););out;`;
+    setLoading(true);
+    let query = '';
+    if (amenityFilter === 'all') {
+      query = `[out:json];(node["amenity"~"restaurant|cafe|fast_food|bar|pub"](around:${radius},${latitude},${longitude}););out;`;
+    } else {
+      query = `[out:json];(node["amenity"="${amenityFilter}"](around:${radius},${latitude},${longitude}););out;`;
+    }
     const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
 
     try {
@@ -260,6 +295,34 @@ export default function MapScreen() {
     </View>
   );
 
+  const AmenityFilter = () => (
+    <View style={[styles.filterContainer, { top: showFilter ? 210 : 60 }]}> 
+      <TouchableOpacity 
+        style={styles.filterToggle} 
+        onPress={() => setShowAmenityDropdown(!showAmenityDropdown)}
+      >
+        <Text style={styles.filterToggleText}>
+          Type: {AMENITY_TYPES.find(t => t.value === amenityFilter)?.label} {showAmenityDropdown ? '▼' : '▲'}
+        </Text>
+      </TouchableOpacity>
+      {showAmenityDropdown && (
+        <View style={styles.filterOptions}>
+          {AMENITY_TYPES.map(type => (
+            <TouchableOpacity 
+              key={type.value} 
+              style={[styles.radiusButton, amenityFilter === type.value && styles.radiusButtonActive]}
+              onPress={() => { setAmenityFilter(type.value); setShowAmenityDropdown(false); }}
+            >
+              <Text style={[styles.radiusButtonText, amenityFilter === type.value && styles.radiusButtonTextActive]}>
+                {type.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+    </View>
+  );
+
   if (loading || !location || ((Platform.OS === 'web' || Platform.OS === 'ios') && mapLoading)) {
     return (
       <View style={styles.loader}>
@@ -274,6 +337,12 @@ export default function MapScreen() {
       <View style={styles.container}>
         {MapComponent && <MapComponent />}
         <RadiusFilter />
+        <AmenityFilter />
+        {loading && (
+          <View style={styles.loadingOverlay}>
+            <ActivityIndicator size="large" color="#007AFF" />
+          </View>
+        )}
       </View>
     );
   }
@@ -290,7 +359,6 @@ export default function MapScreen() {
         }}
         showsUserLocation={true}
       >
-
         <Marker
           coordinate={{
             latitude: location.coords.latitude,
@@ -316,25 +384,34 @@ export default function MapScreen() {
             <Callout>
               <View style={styles.calloutContainer}>
                 <Text style={styles.calloutTitle}>{place.name}</Text>
-                {place.cuisine && <Text>Cuisine: {place.cuisine}</Text>}
-                {(place.address || place.town) && <Text>Address: {place.address || place.town}</Text>}
-                {place.website && (
+                {place.cuisine ? (
+                  <Text>Cuisine: {place.cuisine.split(';').map(c => c.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())).join(', ')}</Text>
+                ) : null}
+                {place.address || place.town ? (
+                  <Text>Address: {place.address || place.town}</Text>
+                ) : null}
+                {place.website ? (
                   <Text style={styles.link} onPress={() => place.website && Linking.openURL(place.website)}>
                     Website
                   </Text>
-                )}
-                <Text style={styles.link} onPress={() => Linking.openURL(place.link)}>
-                  Source Link
-                </Text>
-                <Pressable onPress={() => handleInfoPress(place.name, place.address || place.town || '', place.cuisine)}>
-                  <Text style={styles.infoLink}>Find out more!</Text>
-                </Pressable>
+                ) : null}
+                <View style={{ alignItems: 'center', width: '100%' }}>
+                  <TouchableOpacity style={styles.detailsButton} onPress={() => handleInfoPress(place.name, place.address || place.town || '', place.cuisine)}>
+                    <Text style={styles.detailsButtonText}>View Details</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </Callout>
           </Marker>
         ))}
       </MapView>
       <RadiusFilter />
+      <AmenityFilter />
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
+      )}
     </View>
   );
 }
@@ -348,17 +425,13 @@ const styles = StyleSheet.create({
   },
   calloutTitle: {
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 20,
     marginBottom: 4,
+    textAlign: 'center',
   },
   link: {
     color: 'blue',
     marginTop: 4,
-  },
-  infoLink: {
-    color: 'green',
-    marginTop: 8,
-    fontWeight: 'bold',
   },
   filterContainer: {
     position: 'absolute',
@@ -410,5 +483,38 @@ const styles = StyleSheet.create({
   },
   radiusButtonTextActive: {
     color: 'white',
+  },
+  detailsButton: {
+    backgroundColor: '#007AFF',
+    borderRadius: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 22,
+    alignItems: 'center',
+    marginTop: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 2,
+    alignSelf: 'center',
+  },
+  detailsButtonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 15,
+    letterSpacing: 0.5,
+    textDecorationLine: 'none',
+    textAlign: 'center',
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255,255,255,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 2000,
   },
 });
