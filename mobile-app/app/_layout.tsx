@@ -78,7 +78,7 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5', 
+    backgroundColor: '#222831',
     ...(Platform.OS === 'web' && {
       alignItems: 'center',
       justifyContent: 'center',
