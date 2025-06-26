@@ -90,9 +90,12 @@ const styles = StyleSheet.create({
     // maxWidth: 414, 
     backgroundColor: 'white',
     ...(Platform.OS === 'web' && {
-      height: '100vh',
-      // maxHeight: 896, 
-      // borderRadius: 12,
+      // alignItems: 'center',
+      // justifyContent: 'center',
+      maxWidth: 440,
+      maxHeight: 956,
+      height: '100%',
+      boxSizing: 'border-box',
       shadowColor: '#000',
       shadowOffset: {
         width: 0,
