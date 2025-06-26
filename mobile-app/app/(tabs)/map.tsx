@@ -173,7 +173,7 @@ export default function MapScreen() {
                         textAlign: 'center',
                       }}
                     >
-                      View Details
+                      Find out more!
                     </a>
                   </div>
                 </Popup>
