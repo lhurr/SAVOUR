@@ -319,15 +319,6 @@ export default function LandingPage() {
                   <Text style={styles.primaryButtonText}>Start Free Trial</Text>
                   <IconSymbol name="arrow.right" color="#fff" size={16} style={styles.buttonIcon} />
                 </Pressable>
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.secondaryButton,
-                    pressed && styles.buttonPressed,
-                  ]}
-                  onPress={() => handleButtonPress('secondary')}
-                >
-                  <Text style={styles.secondaryButtonText}>Sign In</Text>
-                </Pressable>
               </Animated.View>
 
             </Animated.View>
