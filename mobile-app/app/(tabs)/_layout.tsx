@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { useColorScheme, TouchableOpacity, Text, View } from 'react-native';
+import { useColorScheme, TouchableOpacity, Text, View, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '../../lib/supabase';
 
@@ -16,6 +16,27 @@ const CustomHeader = () => (
       letterSpacing: 3,
     }}>
       SAVOUR
+    </Text>
+  </View>
+);
+
+
+const CustomTabBarIcon = ({ icon, label, color, focused }: { 
+  icon: React.ReactNode; 
+  label: string; 
+  color: string; 
+  focused: boolean;
+}) => (
+  <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 6 }}>
+    {icon}
+    <Text style={{ 
+      color: color, 
+      fontSize: 10, 
+      fontWeight: focused ? '600' : '400',
+      marginTop: 2,
+      textAlign: 'center'
+    }}>
+      {label}
     </Text>
   </View>
 );
@@ -46,18 +67,18 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: '#202123',
           borderTopColor: '#444654',
-          height: 60,
-          paddingBottom: 8,
+          height: 80,
+          paddingBottom: 12,
           paddingTop: 8,
         },
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: 10,
           fontWeight: '500',
-          marginTop: 0,
+          marginTop: 2,
         },
-        tabBarShowLabel: true,
+        tabBarShowLabel: false, 
         tabBarIconStyle: {
-          marginBottom: -4,
+          marginBottom: 0,
         },
         headerRight: () => (
           <TouchableOpacity 
@@ -79,28 +100,56 @@ export default function TabLayout() {
         name="home"
         options={{
           title: 'HOME',
-          tabBarIcon: ({ color }) => <IconSymbol name="house.fill" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <CustomTabBarIcon
+              icon={<IconSymbol name="house.fill" color={color} />}
+              label="HOME"
+              color={color}
+              focused={focused}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="map"
         options={{
           title: 'MAP',
-          tabBarIcon: ({ color }) => <IconSymbol name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <CustomTabBarIcon
+              icon={<IconSymbol name="paperplane.fill" color={color} />}
+              label="MAP"
+              color={color}
+              focused={focused}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'PROFILE',
-          tabBarIcon: ({ color }) => <IconSymbol name="person.crop.circle.fill" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <CustomTabBarIcon
+              icon={<IconSymbol name="person.crop.circle.fill" color={color} />}
+              label="PROFILE"
+              color={color}
+              focused={focused}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="restaurant-info"
         options={{
           title: 'INFO',
-          tabBarIcon: ({ color }) => <IconSymbol name="magnifyingglass" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <CustomTabBarIcon
+              icon={<IconSymbol name="magnifyingglass" color={color} />}
+              label="INFO"
+              color={color}
+              focused={focused}
+            />
+          ),
         }}
       />
     </Tabs>

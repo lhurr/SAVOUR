@@ -24,7 +24,7 @@ export default function MapScreen() {
   const [loading, setLoading] = useState(true);
   const [MapComponent, setMapComponent] = useState<React.ComponentType | null>(null);
   const [mapLoading, setMapLoading] = useState(true);
-  const [radius, setRadius] = useState(1000); // Default 1km
+  const [radius, setRadius] = useState(500); // Default 500m
   const [showFilter, setShowFilter] = useState(false);
 
   useEffect(() => {
@@ -63,11 +63,31 @@ export default function MapScreen() {
           popupAnchor: [0, -32],
         });
 
+        // user location marker (blue dot)
+        const userLocationIcon = new L.Icon({
+          iconUrl: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+          iconSize: [48, 48],
+          iconAnchor: [24, 48],
+          popupAnchor: [0, -48],
+        });
+
         const WebMap = () => (
           <MapContainer center={[location.coords.latitude, location.coords.longitude]} zoom={15} style={{ height: '100%', width: '100%' }}>
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
+
+            <Marker 
+              position={[location.coords.latitude, location.coords.longitude]} 
+              icon={userLocationIcon}
+            >
+              <Popup>
+                <div>
+                  <strong>Your Location</strong><br />
+                  <span>You are here</span>
+                </div>
+              </Popup>
+            </Marker>
             {places.map((place) => (
               <Marker key={place.id} position={[place.lat, place.lon]} icon={redDotIcon}>
                 <Popup>
@@ -227,6 +247,20 @@ export default function MapScreen() {
         }}
         showsUserLocation={true}
       >
+
+        <Marker
+          coordinate={{
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+          }}
+          pinColor="blue"
+          title="Your Location"
+          description="You are here"
+          tracksViewChanges={false}
+          anchor={{ x: 0.5, y: 0.5 }}
+          centerOffset={{ x: 0, y: 0 }}
+          style={{ width: 40, height: 40 }}
+        />
         {places.map((place) => (
           <Marker
             key={place.id}

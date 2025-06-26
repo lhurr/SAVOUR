@@ -1,7 +1,7 @@
 import 'leaflet/dist/leaflet.css';
 import { Stack } from 'expo-router';
 import React, { useEffect } from 'react';
-import { useColorScheme, TouchableOpacity, Text, View } from 'react-native';
+import { useColorScheme, TouchableOpacity, Text, View, StyleSheet, Platform } from 'react-native';
 import { useRouter, useSegments } from 'expo-router';
 import { supabase } from '../lib/supabase';
 
@@ -64,9 +64,44 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-    </Stack>
+    <View style={styles.container}>
+      <View style={styles.mobileContainer}>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        </Stack>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5', 
+    ...(Platform.OS === 'web' && {
+      alignItems: 'center',
+      justifyContent: 'center',
+    }),
+  },
+  mobileContainer: {
+    flex: 1,
+    width: '100%',
+    maxWidth: 414, 
+    backgroundColor: 'white',
+    ...(Platform.OS === 'web' && {
+      height: '100vh',
+      maxHeight: 896, 
+      // borderRadius: 12,
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 4,
+      },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 8,
+      overflow: 'hidden',
+    }),
+  },
+});
