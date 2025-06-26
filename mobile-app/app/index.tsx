@@ -1,7 +1,8 @@
-import React from 'react';
-import { View, StyleSheet, Platform, Pressable, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, Platform, Pressable, ScrollView, Animated, Dimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '../components/ui/Typography';
-import { colors, borderRadius } from '../constants/theme';
+import { colors, borderRadius, spacing, typography, shadows } from '../constants/theme';
 import { useRouter } from 'expo-router';
 import { IconSymbol, IconSymbolName } from '../components/ui/IconSymbol';
 
@@ -10,369 +11,860 @@ const SAVOUR_DARK = colors.primaryDark;
 const DARK_BG = colors.background.dark;
 const CARD_BG = colors.surface.dark;
 
-const features: { icon: IconSymbolName; title: string; desc: string }[] = [
-  { icon: 'paperplane.fill', title: 'Map Discovery', desc: 'Explore restaurants on an interactive map, filter by distance, cuisine, and more.' },
-  { icon: 'magnifyingglass', title: 'AI Deep Research', desc: 'Get smart, up-to-date info and recommendations powered by LLMs.' },
-  { icon: 'message.fill', title: 'Conversational Search', desc: 'Find places with natural language—just ask and get personalized results.' },
-  { icon: 'person.crop.circle.fill', title: 'Secure Access', desc: 'Easy sign up, login, and privacy-first user management.' },
-  { icon: 'house.fill', title: 'Personalized Home', desc: 'See tailored suggestions based on your tastes and history.' },
-  { icon: 'person.crop.circle.fill', title: 'Profile Control', desc: 'Set dietary needs, cuisine preferences, and more.' },
+const interactiveFeatures = [
+  { icon: 'sparkles', text: 'Agentic AI', delay: 0 },
+  { icon: 'map.fill', text: 'Smart Discovery', delay: 200 },
+  { icon: 'message.fill', text: 'Informative', delay: 400 },
+  { icon: 'person.crop.circle.fill', text: 'Personalized', delay: 600 },
 ];
 
-const steps: { icon: IconSymbolName; title: string; desc: string }[] = [
-  { icon: 'person.crop.circle.fill', title: 'Personalize', desc: 'Set your tastes and dietary needs.' },
-  { icon: 'paperplane.fill', title: 'Explore', desc: 'Browse and filter restaurants on the map.' },
-  { icon: 'message.fill', title: 'Chat', desc: 'Ask for recommendations and get instant answers.' },
+const features: { icon: IconSymbolName; title: string; highlight?: string }[] = [
+  { 
+    icon: 'map.fill', 
+    title: 'Smart Discovery', 
+    highlight: 'Hyperlocal'
+  },
+  { 
+    icon: 'message.fill', 
+    title: 'Deep Research', 
+    highlight: 'Multi-Agent System'
+  },
+  { 
+    icon: 'person.crop.circle.fill', 
+    title: 'Personalized Experience', 
+    highlight: 'Personalized'
+  },
+  { 
+    icon: 'shield.fill', 
+    title: 'Secure & Private', 
+    highlight: 'Authentication'
+  },
 ];
 
-const testimonials = [
-  { name: 'Sarah Chen', quote: 'SAVOUR helped me find new favorites I never would have tried!', role: 'Food Blogger', initial: 'S' },
-  { name: 'Mike Rodriguez', quote: 'Conversational search is a game changer. Love it!', role: 'Tech Professional', initial: 'M' },
-  { name: 'Alex Thompson', quote: 'Personalized picks are always spot on.', role: 'Local Explorer', initial: 'A' },
+const benefits = [
+  'Reduce decision fatigue now',
+
+];
+
+const socialProof = [
+  // { metric: '10K+', label: 'Active Users' },
+  { metric: 'To-date', label: 'Restaurants' },
+  { metric: '95%', label: 'Satisfaction Rate' },
+  { metric: '24/7', label: 'Availability' },
 ];
 
 export default function LandingPage() {
   const router = useRouter();
+  const [isHovered, setIsHovered] = useState(false);
+  const [activeFeature, setActiveFeature] = useState(0);
+  
+  // Animation values
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+  const slideAnim = React.useRef(new Animated.Value(50)).current;
+  const scaleAnim = React.useRef(new Animated.Value(0.9)).current;
+  const rotateAnim = React.useRef(new Animated.Value(0)).current;
+  const pulseAnim = React.useRef(new Animated.Value(1)).current;
+  
+  // Interactive elements animations
+  const featureAnimations = React.useRef(
+    interactiveFeatures.map(() => new Animated.Value(0))
+  ).current;
+  const buttonScaleAnim = React.useRef(new Animated.Value(1)).current;
+  const badgeScaleAnim = React.useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    // Initial animations
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Continuous pulse animation
+    const pulseLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.05,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    pulseLoop.start();
+
+    // Rotate animation
+    const rotateLoop = Animated.loop(
+      Animated.timing(rotateAnim, {
+        toValue: 1,
+        duration: 20000,
+        useNativeDriver: true,
+      })
+    );
+    rotateLoop.start();
+
+    // Staggered feature animations
+    featureAnimations.forEach((anim, index) => {
+      Animated.timing(anim, {
+        toValue: 1,
+        duration: 600,
+        delay: interactiveFeatures[index].delay,
+        useNativeDriver: true,
+      }).start();
+    });
+
+
+    const featureInterval = setInterval(() => {
+      setActiveFeature((prev) => (prev + 1) % interactiveFeatures.length);
+    }, 3000);
+
+    return () => clearInterval(featureInterval);
+  }, []);
+
+  const handleButtonPress = (type: 'primary' | 'secondary') => {
+    // Button press animation
+    Animated.sequence([
+      Animated.timing(buttonScaleAnim, {
+        toValue: 0.95,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(buttonScaleAnim, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    if (type === 'primary') {
+      router.push('/(auth)/signup');
+    } else {
+      router.push('/(auth)/login');
+    }
+  };
+
+  const handleBadgePress = () => {
+    // Badge press animation
+    Animated.sequence([
+      Animated.timing(badgeScaleAnim, {
+        toValue: 1.1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(badgeScaleAnim, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const rotateInterpolation = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: DARK_BG }} contentContainerStyle={styles.scrollContent}>
-      {/* Hero with gradient background */}
-      <View style={[styles.heroGradient, Platform.OS === 'web' ? { minHeight: '60vh' } as any : null]}>
-        <View style={styles.heroContent}>
-          <Text variant="h1" style={styles.savourBrand} center>SAVOUR</Text>
-          <Text variant="h2" style={styles.heroHeadline} center>Discover Where Taste Meets Technology</Text>
-          <Text variant="body" style={styles.heroSubheadline} center>
-            AI-powered, personalized restaurant discovery. Map, chat, and explore new tastes—tailored just for you.
-          </Text>
-          <Pressable
-            style={({ pressed }) => [styles.ctaButton, pressed && { opacity: 0.85 }]}
-            onPress={() => router.push('/(auth)/signup')}
-          >
-            <Text variant="h2" style={styles.ctaText} center>Sign Up Now!</Text>
-          </Pressable>
+    <SafeAreaView style={{ flex: 1, backgroundColor: DARK_BG }}>
+      <ScrollView style={{ flex: 1, backgroundColor: DARK_BG }} contentContainerStyle={styles.scrollContent}>
+        {/* Interactive Hero Section */}
+        <View style={styles.heroSection}>
+          {/* Remove floating elements on mobile to prevent overlap */}
+          {Platform.OS === 'web' && (
+            <>
+              <Animated.View 
+                style={[
+                  styles.floatingElement,
+                  styles.floatingElement1,
+                  {
+                    transform: [
+                      { rotate: rotateInterpolation },
+                      { scale: pulseAnim },
+                    ],
+                    opacity: 0.05,
+                  }
+                ]}
+              />
+              <Animated.View 
+                style={[
+                  styles.floatingElement,
+                  styles.floatingElement2,
+                  {
+                    transform: [
+                      { rotate: rotateAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['0deg', '-360deg'],
+                      }) },
+                      { scale: pulseAnim },
+                    ],
+                    opacity: 0.03,
+                  }
+                ]}
+              />
+            </>
+          )}
+
+          <View style={styles.heroContainer}>
+            <Animated.View 
+              style={[
+                styles.heroContent,
+                {
+                  opacity: fadeAnim,
+                  transform: [
+                    { translateY: slideAnim },
+                    { scale: scaleAnim },
+                  ],
+                }
+              ]}
+            >
+              {/* Interactive Badge */}
+              <Animated.View 
+                style={[
+                  styles.badge,
+                  {
+                    transform: [{ scale: badgeScaleAnim }],
+                  }
+                ]}
+              >
+                <Pressable onPress={handleBadgePress} style={styles.badgePressable}>
+                  <Text style={styles.badgeText}>🚀 Now Available</Text>
+                </Pressable>
+              </Animated.View>
+
+              {/* Main Title */}
+              <Animated.View style={styles.titleContainer}>
+                <Text variant="h1" style={styles.heroTitle}>
+                  SAVOUR
+                </Text>
+              </Animated.View>
+
+              {/* Interactive Feature Showcase */}
+              <Animated.View style={styles.featureShowcase}>
+                {interactiveFeatures.map((feature, index) => (
+                  <Animated.View
+                    key={index}
+                    style={[
+                      styles.featureItem,
+                      {
+                        opacity: featureAnimations[index],
+                        transform: [
+                          {
+                            translateY: featureAnimations[index].interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [20, 0],
+                            }),
+                          },
+                          {
+                            scale: activeFeature === index ? 1.05 : 1,
+                          },
+                        ],
+                      },
+                    ]}
+                  >
+                    <View style={[
+                      styles.featureIconContainer,
+                      activeFeature === index && styles.activeFeatureIcon
+                    ]}>
+                      <IconSymbol 
+                        name={feature.icon as IconSymbolName} 
+                        color={activeFeature === index ? SAVOUR_GREEN : 'rgba(255, 255, 255, 0.6)'} 
+                        size={18} 
+                      />
+                    </View>
+                    <Text style={{
+                      ...styles.featureText,
+                      ...(activeFeature === index ? styles.activeFeatureText : {})
+                    }}>
+                      {feature.text}
+                    </Text>
+                  </Animated.View>
+                ))}
+              </Animated.View>
+
+              {/* Interactive CTA Buttons */}
+              <Animated.View 
+                style={[
+                  styles.ctaGroup,
+                  {
+                    transform: [{ scale: buttonScaleAnim }],
+                  }
+                ]}
+              >
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.primaryButton,
+                    pressed && styles.buttonPressed,
+                    isHovered && styles.buttonHovered,
+                  ]}
+                  onPress={() => handleButtonPress('primary')}
+                  onPressIn={() => setIsHovered(true)}
+                  onPressOut={() => setIsHovered(false)}
+                >
+                  <Text style={styles.primaryButtonText}>Start Free Trial</Text>
+                  <IconSymbol name="arrow.right" color="#fff" size={16} style={styles.buttonIcon} />
+                </Pressable>
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.secondaryButton,
+                    pressed && styles.buttonPressed,
+                  ]}
+                  onPress={() => handleButtonPress('secondary')}
+                >
+                  <Text style={styles.secondaryButtonText}>Sign In</Text>
+                </Pressable>
+              </Animated.View>
+
+            </Animated.View>
+          </View>
         </View>
-      </View>
-      {/* Why SAVOUR */}
-      <View style={styles.section}>
-        <View style={styles.cardWide}>
-          <Text variant="h1" style={styles.sectionTitle} center>Why SAVOUR?</Text>
-          <Text variant="body" style={styles.sectionText} center>
-            Tired of endless scrolling and decision fatigue? SAVOUR cuts through the noise with smart, personalized recommendations—so you can discover new favorites, not just the same old spots. Let AI do the searching, you do the tasting.
-          </Text>
+
+        <View style={styles.socialProofSection}>
+          <View style={styles.socialProofContainer}>
+            {socialProof.map((item, index) => (
+              <View key={index} style={styles.metricCard}>
+                <Text style={styles.metricValue}>{item.metric}</Text>
+                <Text style={styles.metricLabel}>{item.label}</Text>
+              </View>
+            ))}
+          </View>
         </View>
-      </View>
-      {/* Features */}
-      <View style={styles.section}>
-        <Text variant="h1" style={styles.sectionTitle} center>Features</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.featuresScroll}>
-          {features.map((f, i) => (
-            <View key={i} style={styles.featureCard}>
-              <IconSymbol name={f.icon} color={SAVOUR_GREEN} size={32} style={styles.featureIcon} />
-              <Text variant="h2" style={styles.featureTitle} center>{f.title}</Text>
-              <Text variant="body" style={styles.featureDesc} center>{f.desc}</Text>
+
+        <View style={styles.section}>
+          <View style={styles.sectionContainer}>
+            <View style={styles.sectionHeader}>
+              <Text variant="h2" style={styles.sectionTitle}>Why Choose SAVOUR?</Text>
+              <Text variant="body" style={styles.sectionSubtitle}>
+                Built for food lovers who want more than just another restaurant app
+              </Text>
             </View>
-          ))}
-        </ScrollView>
-      </View>
-      {/* How It Works */}
-      <View style={styles.section}>
-        <Text variant="h1" style={styles.sectionTitle} center>How It Works</Text>
-        <View style={styles.stepsRow}>
-          {steps.map((s, i) => (
-            <View key={i} style={styles.stepCard}>
-              <IconSymbol name={s.icon} color={SAVOUR_GREEN} size={28} style={styles.stepIcon} />
-              <Text variant="h2" style={styles.stepTitle} center>{s.title}</Text>
-              <Text variant="body" style={styles.stepDesc} center>{s.desc}</Text>
+            
+            <View style={styles.featuresGrid}>
+              {features.map((feature, index) => (
+                <View key={index} style={styles.featureCard}>
+                  <View style={styles.featureIconContainer}>
+                    <IconSymbol name={feature.icon} color={SAVOUR_GREEN} size={24} />
+                  </View>
+                  <View style={styles.featureContent}>
+                    <View style={styles.featureHeader}>
+                      <Text variant="h3" style={styles.featureTitle}>{feature.title}</Text>
+                      {feature.highlight && (
+                        <View style={styles.highlightBadge}>
+                          <Text style={styles.highlightText}>{feature.highlight}</Text>
+                        </View>
+                      )}
+                    </View>
+                  </View>
+                </View>
+              ))}
             </View>
-          ))}
+          </View>
         </View>
-      </View>
-      {/* Testimonials */}
-      <View style={styles.section}>
-        <Text variant="h1" style={styles.sectionTitle} center>What Our Users Say</Text>
-        <View style={styles.testimonialsRow}>
-          {testimonials.map((t, i) => (
-            <View key={i} style={styles.testimonialCard}>
-              <View style={styles.avatar}><Text variant="h2" style={{ color: '#fff' }}>{t.initial}</Text></View>
-              <Text variant="h2" style={styles.testimonialName} center>{t.name}</Text>
-              <Text variant="body" style={styles.testimonialRole} center>{t.role}</Text>
-              <Text variant="body" style={styles.testimonialQuote} center>“{t.quote}”</Text>
+
+
+
+        {/* CTA Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionContainer}>
+            <View style={styles.ctaCard}>
+              <Text variant="h2" style={styles.ctaCardTitle}>Ready to Discover Your Next Favorite Restaurant?</Text>
+              <Text variant="body" style={styles.ctaCardSubtitle}>
+              Crave It. Find It. Love It.
+              </Text>
+              <Pressable
+                style={({ pressed }) => [styles.ctaCardButton, pressed && styles.buttonPressed]}
+                onPress={() => router.push('/(auth)/signup')}
+              >
+                <Text style={styles.ctaCardButtonText}>Get Started Free</Text>
+              </Pressable>
             </View>
-          ))}
+          </View>
         </View>
-      </View>
-      {/* Footer */}
-      <View style={styles.footer}>
-        <Text variant="h2" style={styles.footerBrand} center>SAVOUR</Text>
-        <View style={styles.footerLinks}>
-          <Text variant="body" style={styles.footerLink}>Why SAVOUR?</Text>
-          <Text variant="body" style={styles.footerLink}>Features</Text>
-          <Text variant="body" style={styles.footerLink}>How It Works</Text>
-          <Text variant="body" style={styles.footerLink}>Testimonials</Text>
-          <Text variant="body" style={styles.footerLink}>Sign Up</Text>
+
+        {/* Footer */}
+        <View style={styles.footer}>
+          <View style={styles.footerContainer}>
+            <View style={styles.footerContent}>
+              <Text variant="h2" style={styles.footerBrand}>SAVOUR</Text>
+              <Text variant="body" style={styles.footerTagline}>
+                Where taste meets technology
+              </Text>
+            </View>
+            <View style={styles.footerLinks}>
+              <Text variant="body" style={styles.footerLink}>Privacy Policy</Text>
+              <Text variant="body" style={styles.footerLink}>Terms of Service</Text>
+              <Text variant="body" style={styles.footerLink}>Support</Text>
+              <Text variant="body" style={styles.footerLink}>Contact</Text>
+            </View>
+            <Text variant="caption" style={styles.footerCopyright}>
+              © 2025 SAVOUR. All rights reserved.
+            </Text>
+          </View>
         </View>
-        <Text variant="caption" style={styles.footerCopyright} center>
-          © 2024 <Text style={{ color: SAVOUR_GREEN }}>SAVOUR</Text> by BiteDunce. All rights reserved.
-        </Text>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   scrollContent: {
-    paddingBottom: 32,
     backgroundColor: DARK_BG,
+    paddingBottom: Platform.OS === 'web' ? 0 : spacing.xl,
   },
-  heroGradient: {
-    width: '100%',
-    paddingTop: 8,
-    paddingBottom: 8,
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
+  heroSection: {
+    backgroundColor: DARK_BG,
+    paddingTop: Platform.OS === 'web' ? spacing.xxl * 2 : spacing.xl,
+    paddingBottom: spacing.xxl,
     ...Platform.select({
       web: {
-        backgroundImage: 'linear-gradient(135deg, #19C37D 0%, #181A20 100%)',
-      },
-      default: {
-        backgroundColor: DARK_BG,
+        minHeight: 200,
+        backgroundImage: 'linear-gradient(135deg, #19C37D 0%, #0F7A4D 50%, #343541 100%)',
       },
     }),
   },
+  heroContainer: {
+    maxWidth: Platform.OS === 'web' ? 1200 : '100%',
+    marginHorizontal: Platform.OS === 'web' ? 'auto' : 0,
+    paddingHorizontal: spacing.lg,
+    paddingTop: Platform.OS === 'web' ? 0 : spacing.sm,
+  },
   heroContent: {
     alignItems: 'center',
-    paddingHorizontal: 12,
-    marginTop: 0,
-    marginBottom: 0,
+    textAlign: 'center',
+    paddingTop: Platform.OS === 'web' ? 0 : spacing.md,
   },
-  savourBrand: {
-    color: SAVOUR_GREEN,
-    fontWeight: 'bold',
-    fontSize: 72,
-    letterSpacing: 2,
-    textShadowColor: SAVOUR_DARK,
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 0,
-    marginBottom: 8,
+  badge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.round,
+    marginBottom: spacing.xl,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
-  heroHeadline: {
-    marginTop: 4,
-    marginBottom: 8,
-    fontWeight: '700',
+  badgeText: {
     color: '#fff',
-    fontSize: 36,
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.medium as any,
   },
-  heroSubheadline: {
-    color: colors.text.secondary.dark,
-    marginBottom: 16,
-    fontSize: 18,
-    maxWidth: 480,
+  heroTitle: {
+    color: '#fff',
+    fontSize: Platform.OS === 'web' ? typography.sizes.xxxl * 1.2 : typography.sizes.xl * 1.1,
+    fontWeight: typography.weights.bold as any,
+    textAlign: 'center',
+    marginBottom: spacing.lg,
+    lineHeight: 1.1,
+    maxWidth: Platform.OS === 'web' ? 800 : '100%',
+    paddingHorizontal: spacing.sm,
+    flexWrap: 'wrap',
+    letterSpacing: Platform.OS === 'web' ? -1 : 0,
   },
-  ctaButton: {
+  heroSubtitle: {
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: Platform.OS === 'web' ? typography.sizes.lg * 1.1 : typography.sizes.md,
+    textAlign: 'center',
+    marginBottom: spacing.xxl,
+    lineHeight: 1.6,
+    maxWidth: Platform.OS === 'web' ? 600 : '100%',
+    fontWeight: typography.weights.medium as any,
+    paddingHorizontal: spacing.sm,
+    flexWrap: 'wrap',
+  },
+  ctaGroup: {
+    flexDirection: Platform.OS === 'web' ? 'row' : 'column',
+    gap: spacing.md,
+    marginBottom: spacing.lg,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: spacing.sm,
+    width: '100%',
+  },
+  primaryButton: {
     backgroundColor: SAVOUR_GREEN,
-    borderRadius: borderRadius.xl,
-    paddingVertical: 16,
-    paddingHorizontal: 36,
-    marginTop: 8,
-    shadowColor: SAVOUR_GREEN,
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    paddingHorizontal: spacing.xxl,
+    paddingVertical: spacing.lg,
+    borderRadius: borderRadius.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: Platform.OS === 'web' ? 'auto' : 200,
+    maxWidth: Platform.OS === 'web' ? 'auto' : '100%',
+    ...shadows.md,
   },
-  ctaText: {
+  secondaryButton: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: spacing.xxl,
+    paddingVertical: spacing.lg,
+    borderRadius: borderRadius.lg,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    minWidth: Platform.OS === 'web' ? 'auto' : 200,
+    maxWidth: Platform.OS === 'web' ? 'auto' : '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonPressed: {
+    opacity: 0.8,
+    transform: [{ scale: 0.98 }],
+  },
+  primaryButtonText: {
     color: '#fff',
-    fontWeight: '700',
-    fontSize: 24,
-    letterSpacing: 1,
+    fontSize: Platform.OS === 'web' ? typography.sizes.lg : typography.sizes.md,
+    fontWeight: typography.weights.bold as any,
+  },
+  secondaryButtonText: {
+    color: '#fff',
+    fontSize: Platform.OS === 'web' ? typography.sizes.lg : typography.sizes.md,
+    fontWeight: typography.weights.medium as any,
+  },
+  ctaNote: {
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: typography.sizes.sm,
+    textAlign: 'center',
+  },
+  socialProofSection: {
+    backgroundColor: CARD_BG,
+    paddingVertical: spacing.xl,
+    borderTopWidth: 1,
+    borderColor: colors.border.dark,
+  },
+  socialProofContainer: {
+    maxWidth: Platform.OS === 'web' ? 1200 : '100%',
+    marginHorizontal: Platform.OS === 'web' ? 'auto' : 0,
+    paddingHorizontal: spacing.lg,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    flexWrap: 'wrap',
+    gap: spacing.lg,
+    alignItems: 'center',
+  },
+  metricCard: {
+    alignItems: 'center',
+    minWidth: Platform.OS === 'web' ? 120 : 80,
+    flex: 1,
+    maxWidth: Platform.OS === 'web' ? 'auto' : '45%',
+  },
+  metricValue: {
+    color: SAVOUR_GREEN,
+    fontSize: Platform.OS === 'web' ? typography.sizes.xxl : typography.sizes.lg,
+    fontWeight: typography.weights.bold as any,
+    marginBottom: spacing.xs,
+    textAlign: 'center',
+  },
+  metricLabel: {
+    color: colors.text.secondary.dark,
+    fontSize: Platform.OS === 'web' ? typography.sizes.sm : typography.sizes.xs,
+    fontWeight: typography.weights.medium as any,
+    textAlign: 'center',
+    flexWrap: 'wrap',
   },
   section: {
-    width: '100%',
-    alignItems: 'center',
-    marginBottom: 56,
+    paddingVertical: Platform.OS === 'web' ? spacing.xxl : spacing.lg,
   },
-  cardWide: {
-    backgroundColor: CARD_BG,
-    borderRadius: borderRadius.xl,
-    padding: 40,
-    width: '92%',
-    maxWidth: 700,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.10,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
+  sectionContainer: {
+    maxWidth: Platform.OS === 'web' ? 1400 : '100%',
+    marginHorizontal: Platform.OS === 'web' ? 'auto' : 0,
+    paddingHorizontal: spacing.lg,
+  },
+  sectionHeader: {
+    textAlign: 'center',
+    marginBottom: Platform.OS === 'web' ? spacing.xxl : spacing.lg,
   },
   sectionTitle: {
-    color: SAVOUR_GREEN,
-    fontWeight: '800',
-    marginBottom: 18,
-    fontSize: 38,
-    letterSpacing: 1,
-    textAlign: 'center',
-  },
-  sectionText: {
     color: '#fff',
-    fontSize: 18,
-    lineHeight: 28,
-    fontWeight: '500',
-    letterSpacing: 0.2,
+    fontSize: Platform.OS === 'web' ? typography.sizes.xxl : typography.sizes.lg,
+    fontWeight: typography.weights.bold as any,
+    marginBottom: spacing.md,
     textAlign: 'center',
+    // paddingHorizontal: spacing.sm,
+    flexWrap: 'wrap',
   },
-  featuresScroll: {
-    flexDirection: 'row',
-    gap: 16,
-    paddingHorizontal: 8,
-    paddingVertical: 8,
+  sectionSubtitle: {
+    color: colors.text.secondary.dark,
+    fontSize: Platform.OS === 'web' ? typography.sizes.lg : typography.sizes.md,
+    textAlign: 'center',
+    maxWidth: Platform.OS === 'web' ? 600 : '100%',
+    marginHorizontal: 'auto',
+    paddingHorizontal: spacing.sm,
+    flexWrap: 'wrap',
+  },
+  featuresGrid: {
+    gap: spacing.lg,
   },
   featureCard: {
     backgroundColor: CARD_BG,
     borderRadius: borderRadius.lg,
-    padding: 32,
-    marginHorizontal: 12,
-    minWidth: 220,
-    maxWidth: 260,
+    padding: Platform.OS === 'web' ? spacing.xl : spacing.lg,
+    flexDirection: Platform.OS === 'web' ? 'row' : 'column',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.10,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
+    gap: spacing.lg,
+    ...shadows.sm,
+    borderWidth: 1,
+    borderColor: colors.border.dark,
   },
-  featureIcon: {
-    marginBottom: 12,
+  featureIconContainer: {
+    backgroundColor: 'rgba(25, 195, 125, 0.1)',
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    minWidth: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  featureContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  featureHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
   },
   featureTitle: {
     color: '#fff',
-    fontWeight: '700',
-    marginBottom: 8,
-    fontSize: 22,
+    fontSize: Platform.OS === 'web' ? typography.sizes.lg : typography.sizes.md,
+    fontWeight: typography.weights.bold as any,
+    textAlign: 'center',
+  },
+  highlightBadge: {
+    backgroundColor: 'rgba(25, 195, 125, 0.2)',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(25, 195, 125, 0.3)',
+  },
+  highlightText: {
+    color: SAVOUR_GREEN,
+    fontSize: typography.sizes.xs,
+    fontWeight: typography.weights.bold as any,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   featureDesc: {
     color: colors.text.secondary.dark,
-    fontSize: 16,
-    textAlign: 'center',
+    fontSize: Platform.OS === 'web' ? typography.sizes.md : typography.sizes.sm,
+    lineHeight: 1.6,
+    // flexWrap: 'wrap',
+    textAlign: Platform.OS === 'web' ? 'center' : 'center',
   },
-  stepsRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    width: '100%',
-    gap: 24,
-    marginTop: 24,
-  },
-  stepCard: {
+  benefitsCard: {
     backgroundColor: CARD_BG,
-    borderRadius: borderRadius.lg,
-    padding: 28,
-    marginHorizontal: 12,
-    minWidth: 140,
-    maxWidth: 200,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.10,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
+    borderRadius: borderRadius.xl,
+    padding: Platform.OS === 'web' ? spacing.xxl : spacing.lg,
+    ...shadows.md,
+    borderWidth: 1,
+    borderColor: colors.border.dark,
   },
-  stepIcon: {
-    marginBottom: 10,
-  },
-  stepTitle: {
+  benefitsTitle: {
     color: '#fff',
-    fontWeight: '700',
-    marginBottom: 6,
-    fontSize: 20,
-  },
-  stepDesc: {
-    color: colors.text.secondary.dark,
-    fontSize: 15,
+    fontSize: Platform.OS === 'web' ? typography.sizes.xl : typography.sizes.lg,
+    fontWeight: typography.weights.bold as any,
+    marginBottom: spacing.xl,
     textAlign: 'center',
   },
-  testimonialsRow: {
+  benefitsList: {
+    gap: spacing.lg,
+  },
+  benefitItem: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    width: '100%',
-    gap: 16,
-    marginTop: 16,
-    flexWrap: 'wrap',
-  },
-  testimonialCard: {
-    backgroundColor: CARD_BG,
-    borderRadius: borderRadius.lg,
-    padding: 28,
-    margin: 12,
-    minWidth: 220,
-    maxWidth: 280,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.10,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
+    gap: spacing.md,
   },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+  benefitIcon: {
+    minWidth: 24,
+  },
+  benefitText: {
+    color: colors.text.secondary.dark,
+    fontSize: Platform.OS === 'web' ? typography.sizes.md : typography.sizes.sm,
+    flex: 1,
+    lineHeight: 1.6,
+  },
+  ctaCard: {
+    backgroundColor: CARD_BG,
+    borderRadius: borderRadius.xl,
+    padding: Platform.OS === 'web' ? spacing.xxl : spacing.lg,
+    alignItems: 'center',
+    textAlign: 'center',
+    ...shadows.md,
+    borderWidth: 1,
+    borderColor: colors.border.dark,
+  },
+  ctaCardTitle: {
+    color: '#fff',
+    fontSize: Platform.OS === 'web' ? typography.sizes.xl : typography.sizes.lg,
+    fontWeight: typography.weights.bold as any,
+    marginBottom: spacing.lg,
+    textAlign: 'center',
+  },
+  ctaCardSubtitle: {
+    color: colors.text.secondary.dark,
+    fontSize: Platform.OS === 'web' ? typography.sizes.md : typography.sizes.sm,
+    marginBottom: spacing.xl,
+    textAlign: 'center',
+    maxWidth: Platform.OS === 'web' ? 500 : '100%',
+    lineHeight: 1.6,
+  },
+  ctaCardButton: {
     backgroundColor: SAVOUR_GREEN,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
+    paddingHorizontal: spacing.xxl,
+    paddingVertical: spacing.lg,
+    borderRadius: borderRadius.lg,
+    ...shadows.md,
+    minWidth: Platform.OS === 'web' ? 'auto' : 200,
   },
-  testimonialName: {
+  ctaCardButtonText: {
     color: '#fff',
-    fontWeight: '700',
-    fontSize: 18,
-    marginBottom: 2,
-  },
-  testimonialRole: {
-    color: colors.text.secondary.dark,
-    fontSize: 14,
-    marginBottom: 8,
-  },
-  testimonialQuote: {
-    color: colors.text.secondary.dark,
-    fontStyle: 'italic',
-    fontSize: 16,
-    marginTop: 4,
-    textAlign: 'center',
+    fontSize: Platform.OS === 'web' ? typography.sizes.lg : typography.sizes.md,
+    fontWeight: typography.weights.bold as any,
   },
   footer: {
-    width: '100%',
-    marginTop: 0,
-    paddingVertical: 32,
-    alignItems: 'center',
     backgroundColor: CARD_BG,
     borderTopWidth: 1,
     borderColor: colors.border.dark,
+    paddingVertical: spacing.xl,
+  },
+  footerContainer: {
+    maxWidth: Platform.OS === 'web' ? 1200 : '100%',
+    marginHorizontal: Platform.OS === 'web' ? 'auto' : 0,
+    paddingHorizontal: spacing.lg,
+    alignItems: 'center',
+  },
+  footerContent: {
+    alignItems: 'center',
+    marginBottom: spacing.lg,
   },
   footerBrand: {
     color: SAVOUR_GREEN,
-    fontWeight: 'bold',
-    fontSize: 28,
-    marginBottom: 8,
-    textShadowColor: SAVOUR_DARK,
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 0,
-    letterSpacing: 2,
+    fontSize: Platform.OS === 'web' ? typography.sizes.xl : typography.sizes.lg,
+    fontWeight: typography.weights.bold as any,
+    marginBottom: spacing.xs,
+  },
+  footerTagline: {
+    color: colors.text.secondary.dark,
+    fontSize: typography.sizes.sm,
   },
   footerLinks: {
     flexDirection: 'row',
+    gap: spacing.lg,
+    marginBottom: spacing.lg,
     flexWrap: 'wrap',
     justifyContent: 'center',
-    marginBottom: 8,
-    gap: 16,
   },
   footerLink: {
     color: colors.text.secondary.dark,
-    marginHorizontal: 8,
-    fontSize: 15,
+    fontSize: typography.sizes.sm,
     textDecorationLine: 'underline',
   },
   footerCopyright: {
     color: colors.text.secondary.dark,
-    marginTop: 8,
+    fontSize: typography.sizes.xs,
+    textAlign: 'center',
+  },
+  floatingElement: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0.1,
+  },
+  floatingElement1: {
+    transform: [{ rotate: '0deg' }],
+  },
+  floatingElement2: {
+    transform: [{ rotate: '0deg' }],
+  },
+  titleContainer: {
+    marginBottom: spacing.lg,
+  },
+  titleUnderline: {
+    height: 2,
+    backgroundColor: SAVOUR_GREEN,
+    width: '100%',
+  },
+  subtitleContainer: {
+    marginBottom: spacing.xl,
+  },
+  featureShowcase: {
+    flexDirection: Platform.OS === 'web' ? 'row' : 'column',
+    gap: spacing.xl,
+    marginBottom: spacing.xxl,
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    width: '100%',
+    justifyContent: 'center',
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    flexWrap: 'wrap',
+    maxWidth: Platform.OS === 'web' ? 'auto' : '100%',
+    paddingHorizontal: spacing.sm,
+  },
+  activeFeatureIcon: {
+    backgroundColor: 'rgba(25, 195, 125, 0.2)',
+    borderWidth: 1,
+    borderColor: SAVOUR_GREEN,
+  },
+  featureText: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.medium as any,
+    flexWrap: 'wrap',
+    textAlign: Platform.OS === 'web' ? 'left' : 'center',
+  },
+  activeFeatureText: {
+    color: SAVOUR_GREEN,
+    fontWeight: typography.weights.bold as any,
+    flexWrap: 'wrap',
+    textAlign: Platform.OS === 'web' ? 'left' : 'center',
+  },
+  badgePressable: {
+    padding: spacing.sm,
+  },
+  buttonHovered: {
+    backgroundColor: SAVOUR_DARK,
+    transform: [{ scale: 1.02 }],
+  },
+  buttonIcon: {
+    marginLeft: spacing.sm,
+  },
+  trustIndicators: {
+    alignItems: 'center',
+    marginTop: spacing.lg,
+  },
+  trustIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  trustText: {
+    color: 'rgba(255, 255, 255, 0.4)',
+    fontSize: typography.sizes.xs,
+    marginRight: spacing.md,
   },
 }); 
