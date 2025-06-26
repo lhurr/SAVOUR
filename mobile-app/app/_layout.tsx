@@ -87,11 +87,11 @@ const styles = StyleSheet.create({
   mobileContainer: {
     flex: 1,
     width: '100%',
-    maxWidth: 414, 
+    // maxWidth: 414, 
     backgroundColor: 'white',
     ...(Platform.OS === 'web' && {
       height: '100vh',
-      maxHeight: 896, 
+      // maxHeight: 896, 
       // borderRadius: 12,
       shadowColor: '#000',
       shadowOffset: {
