@@ -4,10 +4,10 @@ export default {
     slug: 'savour',
     version: '1.0.0',
     orientation: 'portrait',
-    icon: './assets/icon.png',
+    icon: './assets/images/icon.png',
     userInterfaceStyle: 'light',
     splash: {
-      image: './assets/splash.png',
+      image: './assets/images/splash-icon.png',
       resizeMode: 'contain',
       backgroundColor: '#ffffff'
     },
@@ -19,13 +19,13 @@ export default {
     },
     android: {
       adaptiveIcon: {
-        foregroundImage: './assets/icon.png',
+        foregroundImage: './assets/images/adaptive-icon.png',
         backgroundColor: '#ffffff'
       }
     },
     web: {
       output: 'server',
-      favicon: './assets/favicon.png'
+      favicon: './assets/images/favicon.png'
     },
     extra: {
       apiUrl:'https://savour-backend.onrender.com', // https://savour-backend.onrender.com or http://localhost:2024
