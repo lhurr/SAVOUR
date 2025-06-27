@@ -34,21 +34,18 @@ const features: { icon: IconSymbolName; title: string; highlight?: string }[] = 
     title: 'Personalized Experience', 
     highlight: 'Personalized'
   },
-  { 
-    icon: 'shield.fill', 
-    title: 'Secure & Private', 
-    highlight: 'Authentication'
-  },
+  // { 
+  //   icon: 'shield.fill', 
+  //   title: 'Secure & Private', 
+  //   highlight: 'Authentication'
+  // },
 ];
 
-const benefits = [
-  'Reduce decision fatigue now',
 
-];
 
 const socialProof = [
   // { metric: '10K+', label: 'Active Users' },
-  { metric: 'To-date', label: 'Restaurants' },
+  { metric: 'To-date', label: 'Restaurants/Cafes/Bars' },
   { metric: '95%', label: 'Satisfaction Rate' },
   { metric: '24/7', label: 'Availability' },
 ];
@@ -441,12 +438,13 @@ const styles = StyleSheet.create({
   },
   badge: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
     borderRadius: borderRadius.round,
     marginBottom: spacing.xl,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
+    alignSelf: 'center',
   },
   badgeText: {
     color: '#fff',
