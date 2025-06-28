@@ -12,7 +12,7 @@ const DARK_BG = colors.background.dark;
 const CARD_BG = colors.surface.dark;
 
 const interactiveFeatures = [
-  { icon: 'sparkles', text: 'Agentic AI', delay: 0 },
+  { icon: 'sparkles', text: 'Agentic Assistant', delay: 0 },
   { icon: 'map.fill', text: 'Smart Discovery', delay: 200 },
   { icon: 'message.fill', text: 'Informative', delay: 400 },
   { icon: 'person.crop.circle.fill', text: 'Personalized', delay: 600 },
@@ -34,11 +34,6 @@ const features: { icon: IconSymbolName; title: string; highlight?: string }[] = 
     title: 'Personalized Experience', 
     highlight: 'Personalized'
   },
-  // { 
-  //   icon: 'shield.fill', 
-  //   title: 'Secure & Private', 
-  //   highlight: 'Authentication'
-  // },
 ];
 
 
@@ -230,24 +225,15 @@ export default function LandingPage() {
                 }
               ]}
             >
-              {/* Interactive Badge */}
-              <Animated.View 
-                style={[
-                  styles.badge,
-                  {
-                    transform: [{ scale: badgeScaleAnim }],
-                  }
-                ]}
-              >
-                <Pressable onPress={handleBadgePress} style={styles.badgePressable}>
-                  <Text style={styles.badgeText}>🚀 Now Available</Text>
-                </Pressable>
-              </Animated.View>
+              
 
               {/* Main Title */}
               <Animated.View style={styles.titleContainer}>
-                <Text variant="h1" style={styles.heroTitle}>
-                  SAVOUR
+                <Text variant="h1" style={styles.heroTitleGreen}>
+                SAVOUR
+                </Text>
+                <Text variant="body" style={styles.heroSubtitle}>
+                  Discover Where Taste Meets Technology
                 </Text>
               </Animated.View>
 
@@ -313,8 +299,7 @@ export default function LandingPage() {
                   onPressIn={() => setIsHovered(true)}
                   onPressOut={() => setIsHovered(false)}
                 >
-                  <Text style={styles.primaryButtonText}>Start Free Trial</Text>
-                  <IconSymbol name="arrow.right" color="#fff" size={16} style={styles.buttonIcon} />
+                  <Text style={styles.primaryButtonText}>Start Savouring Now</Text>
                 </Pressable>
               </Animated.View>
 
@@ -322,21 +307,14 @@ export default function LandingPage() {
           </View>
         </View>
 
-        <View style={styles.socialProofSection}>
-          <View style={styles.socialProofContainer}>
-            {socialProof.map((item, index) => (
-              <View key={index} style={styles.metricCard}>
-                <Text style={styles.metricValue}>{item.metric}</Text>
-                <Text style={styles.metricLabel}>{item.label}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
         <View style={styles.section}>
           <View style={styles.sectionContainer}>
             <View style={styles.sectionHeader}>
-              <Text variant="h2" style={styles.sectionTitle}>Why Choose SAVOUR?</Text>
+              <View style={styles.sectionTitleContainer}>
+                <Text variant="h2" style={styles.sectionTitle}>Why Choose </Text>
+                <Text variant="h2" style={styles.savourGreenTitle}>SAVOUR</Text>
+                <Text variant="h2" style={styles.sectionTitle}>?</Text>
+              </View>
               <Text variant="body" style={styles.sectionSubtitle}>
                 Built for food lovers who want more than just another restaurant app
               </Text>
@@ -378,7 +356,7 @@ export default function LandingPage() {
                 style={({ pressed }) => [styles.ctaCardButton, pressed && styles.buttonPressed]}
                 onPress={() => router.push('/(auth)/signup')}
               >
-                <Text style={styles.ctaCardButtonText}>Get Started Free</Text>
+                <Text style={styles.ctaCardButtonText}>Get Started Now</Text>
               </Pressable>
             </View>
           </View>
@@ -390,7 +368,7 @@ export default function LandingPage() {
             <View style={styles.footerContent}>
               <Text variant="h2" style={styles.footerBrand}>SAVOUR</Text>
               <Text variant="body" style={styles.footerTagline}>
-                Where taste meets technology
+                Where Taste Meets Technology
               </Text>
             </View>
             <View style={styles.footerLinks}>
@@ -464,15 +442,16 @@ const styles = StyleSheet.create({
     letterSpacing: Platform.OS === 'web' ? -1 : 0,
   },
   heroSubtitle: {
-    color: 'rgba(255, 255, 255, 0.9)',
-    fontSize: Platform.OS === 'web' ? typography.sizes.lg * 1.1 : typography.sizes.md,
+    color: 'rgba(255, 255, 255, 0.95)',
+    fontSize: Platform.OS === 'web' ? typography.sizes.md : typography.sizes.sm,
     textAlign: 'center',
     marginBottom: spacing.xxl,
-    lineHeight: 1.6,
-    maxWidth: Platform.OS === 'web' ? 600 : '100%',
-    fontWeight: typography.weights.medium as any,
+    marginTop: spacing.xxl,
+    lineHeight: 1.4,
+    maxWidth: 400,
+    alignSelf: 'center',
+    fontWeight: typography.weights.bold as any,
     paddingHorizontal: spacing.sm,
-    flexWrap: 'wrap',
   },
   ctaGroup: {
     flexDirection: Platform.OS === 'web' ? 'row' : 'column',
@@ -575,13 +554,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: Platform.OS === 'web' ? spacing.xxl : spacing.lg,
   },
+  sectionTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   sectionTitle: {
     color: '#fff',
     fontSize: Platform.OS === 'web' ? typography.sizes.xxl : typography.sizes.lg,
     fontWeight: typography.weights.bold as any,
     marginBottom: spacing.md,
     textAlign: 'center',
-    // paddingHorizontal: spacing.sm,
     flexWrap: 'wrap',
   },
   sectionSubtitle: {
@@ -784,6 +767,8 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     marginBottom: spacing.lg,
+    alignItems: 'center',
+    flexDirection: 'column',
   },
   titleUnderline: {
     height: 2,
@@ -855,5 +840,32 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.4)',
     fontSize: typography.sizes.xs,
     marginRight: spacing.md,
+  },
+  savourGreenText: {
+    color: SAVOUR_GREEN,
+  },
+  savourGreenTitle: {
+    color: SAVOUR_GREEN,
+    fontSize: Platform.OS === 'web' ? typography.sizes.xxl : typography.sizes.lg,
+    fontWeight: typography.weights.bold as any,
+    marginBottom: spacing.md,
+    textAlign: 'center',
+    flexWrap: 'wrap',
+  },
+  heroTitleGreen: {
+    color: SAVOUR_GREEN,
+    fontSize: Platform.OS === 'web' ? typography.sizes.xxxl * 1.2 : typography.sizes.xl * 1.1,
+    fontWeight: typography.weights.bold as any,
+    textAlign: 'center',
+    marginBottom: spacing.lg,
+    lineHeight: 1.1,
+    maxWidth: Platform.OS === 'web' ? 800 : '100%',
+    paddingHorizontal: spacing.sm,
+    flexWrap: 'wrap',
+    letterSpacing: Platform.OS === 'web' ? -1 : 0,
+    ...shadows.md,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 4,
   },
 }); 
