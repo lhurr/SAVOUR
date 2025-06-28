@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Platform, Pressable, ScrollView, Animated, Dimensions } from 'react-native';
+import { View, StyleSheet, Platform, Pressable, ScrollView, Animated, Dimensions, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '../components/ui/Typography';
 import { colors, borderRadius, spacing, typography, shadows } from '../constants/theme';
@@ -174,6 +174,7 @@ export default function LandingPage() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: DARK_BG }}>
+      <StatusBar barStyle="light-content" backgroundColor={DARK_BG} />
       <ScrollView style={{ flex: 1, backgroundColor: DARK_BG }} contentContainerStyle={styles.scrollContent}>
         {/* Interactive Hero Section */}
         <View style={styles.heroSection}>
@@ -701,7 +702,8 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
     borderRadius: borderRadius.lg,
     ...shadows.md,
-    minWidth: Platform.OS === 'web' ? 'auto' : 200,
+    minWidth: 260,
+    alignSelf: 'center',
   },
   ctaCardButtonText: {
     color: '#fff',
