@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, ActivityIndicator, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, ScrollView, RefreshControl } from 'react-native';
 import { Text } from '../../components/ui/Typography'; 
+import { Button } from '../../components/ui/Button';
 import { supabase } from '../../lib/supabase';
 import { RestaurantService } from '../../lib/database';
 import { UserRestaurantInteraction } from '../../lib/types';
@@ -13,13 +14,44 @@ interface InteractionStats {
   unique_restaurants: number;
 }
 
+interface PaginationData {
+  data: UserRestaurantInteraction[];
+  totalCount: number;
+  currentPage: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
 export default function Profile() {
   const [email, setEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState<InteractionStats | null>(null);
-  const [recentRestaurants, setRecentRestaurants] = useState<UserRestaurantInteraction[]>([]);
-  const [favorites, setFavorites] = useState<UserRestaurantInteraction[]>([]);
+  
+
+  const [recentRestaurants, setRecentRestaurants] = useState<PaginationData>({
+    data: [],
+    totalCount: 0,
+    currentPage: 1,
+    totalPages: 0,
+    hasNextPage: false,
+    hasPrevPage: false
+  });
+  const [recentLoading, setRecentLoading] = useState(false);
+  
+  // Favorites pagination
+  const [favorites, setFavorites] = useState<PaginationData>({
+    data: [],
+    totalCount: 0,
+    currentPage: 1,
+    totalPages: 0,
+    hasNextPage: false,
+    hasPrevPage: false
+  });
+  const [favoritesLoading, setFavoritesLoading] = useState(false);
+
+  const PAGE_SIZE = 5;
 
   const fetchUserData = async () => {
     try {
@@ -34,17 +66,41 @@ export default function Profile() {
       const interactionStats = await RestaurantService.getInteractionStats();
       setStats(interactionStats);
 
-      // recent restaurants
-      const recent = await RestaurantService.getRecentRestaurants(10);
-      setRecentRestaurants(recent);
+      // recent restaurants with pagination
+      const recentData = await RestaurantService.getRecentRestaurantsPaginated(1, PAGE_SIZE);
+      setRecentRestaurants(recentData);
 
-      // favorites
-      const favoriteRestaurants = await RestaurantService.getFavoriteRestaurants();
-      setFavorites(favoriteRestaurants);
+      // favorites with pagination
+      const favoritesData = await RestaurantService.getFavoriteRestaurantsPaginated(1, PAGE_SIZE);
+      setFavorites(favoritesData);
     } catch (error) {
       console.error('Error fetching user data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchRecentRestaurants = async (page: number) => {
+    setRecentLoading(true);
+    try {
+      const data = await RestaurantService.getRecentRestaurantsPaginated(page, PAGE_SIZE);
+      setRecentRestaurants(data);
+    } catch (error) {
+      console.error('Error fetching recent restaurants:', error);
+    } finally {
+      setRecentLoading(false);
+    }
+  };
+
+  const fetchFavorites = async (page: number) => {
+    setFavoritesLoading(true);
+    try {
+      const data = await RestaurantService.getFavoriteRestaurantsPaginated(page, PAGE_SIZE);
+      setFavorites(data);
+    } catch (error) {
+      console.error('Error fetching favorites:', error);
+    } finally {
+      setFavoritesLoading(false);
     }
   };
 
@@ -101,6 +157,50 @@ export default function Profile() {
           📍 {interaction.restaurant_address}
         </Text>
       )}
+    </View>
+  );
+
+  const PaginationControls = ({ 
+    currentPage, 
+    totalPages, 
+    hasNextPage, 
+    hasPrevPage, 
+    onNext, 
+    onPrev, 
+    loading 
+  }: {
+    currentPage: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+    onNext: () => void;
+    onPrev: () => void;
+    loading: boolean;
+  }) => (
+    <View style={styles.paginationContainer}>
+      <Button
+        title="← Previous"
+        variant="outline"
+        size="small"
+        onPress={onPrev}
+        disabled={!hasPrevPage || loading}
+        style={styles.paginationButton}
+      />
+      
+      <View style={styles.paginationInfo}>
+        <Text style={styles.paginationText}>
+          Page {currentPage} of {totalPages}
+        </Text>
+      </View>
+      
+      <Button
+        title="Next →"
+        variant="outline"
+        size="small"
+        onPress={onNext}
+        disabled={!hasNextPage || loading}
+        style={styles.paginationButton}
+      />
     </View>
   );
 
@@ -169,54 +269,105 @@ export default function Profile() {
         </View>
       )}
 
-      {/* recent Restaurants */}
-      {recentRestaurants.length > 0 && (
+      {/* Recent Restaurants */}
+      {recentRestaurants.totalCount > 0 && (
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recent Visits</Text>
-            {/* <Text style={styles.favoriteIndicator}>❤️ Favorites</Text> */}
+            <Text style={styles.sectionSubtitle}>
+              {recentRestaurants.totalCount} total visits
+            </Text>
           </View>
-          {recentRestaurants.map((interaction) => (
-            <RestaurantCard key={interaction.id} interaction={interaction} />
-          ))}
-        </View>
-      )}
-
-      {/* fav Restaurants */}
-      {favorites.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Favorite Restaurants</Text>
-          {favorites.map((interaction) => (
-            <View key={interaction.id} style={[styles.restaurantCard, styles.favoriteCard]}>
-              <View style={styles.restaurantHeader}>
-                <View style={styles.restaurantInfo}>
-                  <Text style={styles.restaurantName}>
-                    ❤️ {interaction.restaurant_name}
-                  </Text>
-                  <View style={styles.restaurantMeta}>
-                    {interaction.restaurant_cuisine && (
-                      <View style={styles.cuisineTag}>
-                        <Text style={styles.cuisineText}>🍽️ {interaction.restaurant_cuisine}</Text>
-                      </View>
-                    )}
-                    <Text style={styles.restaurantDate}>
-                      {formatDate(interaction.interaction_date)}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-              {interaction.restaurant_address && (
-                <Text style={styles.restaurantAddress}>
-                  📍 {interaction.restaurant_address}
-                </Text>
-              )}
+          
+          {recentLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color={colors.primary} />
+              <Text style={styles.loadingText}>Loading...</Text>
             </View>
-          ))}
+          ) : (
+            <>
+              {recentRestaurants.data.map((interaction) => (
+                <RestaurantCard key={interaction.id} interaction={interaction} />
+              ))}
+              
+              {recentRestaurants.totalPages > 1 && (
+                <PaginationControls
+                  currentPage={recentRestaurants.currentPage}
+                  totalPages={recentRestaurants.totalPages}
+                  hasNextPage={recentRestaurants.hasNextPage}
+                  hasPrevPage={recentRestaurants.hasPrevPage}
+                  onNext={() => fetchRecentRestaurants(recentRestaurants.currentPage + 1)}
+                  onPrev={() => fetchRecentRestaurants(recentRestaurants.currentPage - 1)}
+                  loading={recentLoading}
+                />
+              )}
+            </>
+          )}
         </View>
       )}
 
-      {/* Empty */}
-      {recentRestaurants.length === 0 && favorites.length === 0 && (
+      {/* Favorite Restaurants */}
+      {favorites.totalCount > 0 && (
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Favorite Restaurants</Text>
+            <Text style={styles.sectionSubtitle}>
+              {favorites.totalCount} total favorites
+            </Text>
+          </View>
+          
+          {favoritesLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color={colors.primary} />
+              <Text style={styles.loadingText}>Loading...</Text>
+            </View>
+          ) : (
+            <>
+              {favorites.data.map((interaction) => (
+                <View key={interaction.id} style={[styles.restaurantCard, styles.favoriteCard]}>
+                  <View style={styles.restaurantHeader}>
+                    <View style={styles.restaurantInfo}>
+                      <Text style={styles.restaurantName}>
+                        ❤️ {interaction.restaurant_name}
+                      </Text>
+                      <View style={styles.restaurantMeta}>
+                        {interaction.restaurant_cuisine && (
+                          <View style={styles.cuisineTag}>
+                            <Text style={styles.cuisineText}>🍽️ {interaction.restaurant_cuisine}</Text>
+                          </View>
+                        )}
+                        <Text style={styles.restaurantDate}>
+                          {formatDate(interaction.interaction_date)}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                  {interaction.restaurant_address && (
+                    <Text style={styles.restaurantAddress}>
+                      📍 {interaction.restaurant_address}
+                    </Text>
+                  )}
+                </View>
+              ))}
+              
+              {favorites.totalPages > 1 && (
+                <PaginationControls
+                  currentPage={favorites.currentPage}
+                  totalPages={favorites.totalPages}
+                  hasNextPage={favorites.hasNextPage}
+                  hasPrevPage={favorites.hasPrevPage}
+                  onNext={() => fetchFavorites(favorites.currentPage + 1)}
+                  onPrev={() => fetchFavorites(favorites.currentPage - 1)}
+                  loading={favoritesLoading}
+                />
+              )}
+            </>
+          )}
+        </View>
+      )}
+
+      {/* Empty State */}
+      {recentRestaurants.totalCount === 0 && favorites.totalCount === 0 && (
         <View style={styles.emptyState}>
           <Text style={styles.emptyStateIcon}>🍽️</Text>
           <Text style={styles.emptyStateText}>No restaurant interactions yet</Text>
@@ -291,6 +442,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.text.primary.light,
     marginBottom: spacing.sm,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    color: colors.text.secondary.light,
+    marginTop: spacing.xs,
   },
   statsGrid: {
     flexDirection: 'row',
@@ -405,5 +561,32 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     color: '#FF3B30',
+  },
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    marginTop: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: '#F0F0F0',
+    borderRadius: borderRadius.md,
+  },
+  paginationButton: {
+    minWidth: 80,
+  },
+  paginationInfo: {
+    paddingHorizontal: spacing.md,
+  },
+  paginationText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: colors.text.primary.light,
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.md,
+    gap: spacing.sm,
   },
 });

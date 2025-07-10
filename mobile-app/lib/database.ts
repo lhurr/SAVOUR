@@ -100,9 +100,74 @@ export class RestaurantService {
     return data || [];
   }
 
+  static async getRecentRestaurantsPaginated(page: number = 1, pageSize: number = 5) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    const { data, error, count } = await supabase
+      .from(TABLES.USER_RESTAURANT_INTERACTIONS)
+      .select('*', { count: 'exact' })
+      .eq('user_id', user.id)
+      .eq('interaction_type', 'click')
+      .order('interaction_date', { ascending: false })
+      .range(from, to);
+
+    if (error) {
+      console.error('Error fetching recent restaurants with pagination:', error);
+      throw error;
+    }
+
+    return {
+      data: data || [],
+      totalCount: count || 0,
+      currentPage: page,
+      totalPages: Math.ceil((count || 0) / pageSize),
+      hasNextPage: page * pageSize < (count || 0),
+      hasPrevPage: page > 1
+    };
+  }
+
   // favorite restaurants
   static async getFavoriteRestaurants() {
     return this.getInteractionsByType('favorite');
+  }
+
+  // favorite restaurants with pagination
+  static async getFavoriteRestaurantsPaginated(page: number = 1, pageSize: number = 5) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    const { data, error, count } = await supabase
+      .from(TABLES.USER_RESTAURANT_INTERACTIONS)
+      .select('*', { count: 'exact' })
+      .eq('user_id', user.id)
+      .eq('interaction_type', 'favorite')
+      .order('interaction_date', { ascending: false })
+      .range(from, to);
+
+    if (error) {
+      console.error('Error fetching favorite restaurants with pagination:', error);
+      throw error;
+    }
+
+    return {
+      data: data || [],
+      totalCount: count || 0,
+      currentPage: page,
+      totalPages: Math.ceil((count || 0) / pageSize),
+      hasNextPage: page * pageSize < (count || 0),
+      hasPrevPage: page > 1
+    };
   }
 
   // Toggle favorite status
