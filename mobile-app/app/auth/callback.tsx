@@ -16,7 +16,7 @@ export default function AuthCallback() {
         
         if (session) {
           // Successfully authenticated
-          router.replace('/map');
+          router.replace('/home');
         } else if (params.error) {
           console.error('Auth error:', params.error);
           router.replace('/login');
