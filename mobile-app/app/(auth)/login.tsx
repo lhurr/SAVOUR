@@ -26,7 +26,7 @@ export default function LoginScreen() {
         setErrorMsg(error.message);
       } else {
         setErrorMsg('');
-        router.replace('/map');
+        router.replace('/home');
       }
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'An error occurred');
@@ -43,7 +43,7 @@ export default function LoginScreen() {
         setErrorMsg('Google sign-in failed');
       } else if (data?.url) {
         setErrorMsg('');
-        router.replace('/map');
+        router.replace('/home');
       }
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'Google sign-in failed');
