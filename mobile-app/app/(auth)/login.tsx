@@ -5,14 +5,17 @@ import { Button } from '../../components/ui/Button';
 import { Text } from '../../components/ui/Typography';
 import { colors, spacing, typography, borderRadius, mixins } from '../../constants/theme';
 import { supabase } from '../../lib/supabase';
+import { signInWithGoogle } from '../../lib/googleAuth';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   async function handleLogin() {
+    setIsLoading(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -27,6 +30,25 @@ export default function LoginScreen() {
       }
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleGoogleLogin() {
+    setIsLoading(true);
+    try {
+      const { data, error } = await signInWithGoogle();
+      if (error) {
+        setErrorMsg('Google sign-in failed');
+      } else if (data?.url) {
+        setErrorMsg('');
+        router.replace('/map');
+      }
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : 'Google sign-in failed');
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -67,6 +89,7 @@ export default function LoginScreen() {
             variant="primary"
             size="large"
             style={styles.button}
+            disabled={isLoading}
           />
           <Button
             title="Sign Up"
@@ -74,8 +97,26 @@ export default function LoginScreen() {
             variant="outline"
             size="large"
             style={styles.button}
+            disabled={isLoading}
           />
         </View>
+
+        <View style={styles.dividerContainer}>
+          <View style={styles.divider} />
+          <Text variant="caption" color={colors.text.secondary.dark} style={styles.dividerText}>
+            OR
+          </Text>
+          <View style={styles.divider} />
+        </View>
+
+        <Button
+          title="Continue with Google"
+          onPress={handleGoogleLogin}
+          variant="outline"
+          size="large"
+          style={styles.googleButton}
+          disabled={isLoading}
+        />
 
         <View style={styles.forgotPasswordContainer}>
           <Button
@@ -84,6 +125,7 @@ export default function LoginScreen() {
             variant="outline"
             size="small"
             style={styles.forgotPasswordButton}
+            disabled={isLoading}
           />
         </View>
       </View>
@@ -140,6 +182,24 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   error: {
+    marginBottom: spacing.md,
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '80%',
+    marginVertical: spacing.md,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.border.dark,
+  },
+  dividerText: {
+    marginHorizontal: spacing.md,
+  },
+  googleButton: {
+    width: '80%',
     marginBottom: spacing.md,
   },
   forgotPasswordContainer: {

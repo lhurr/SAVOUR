@@ -137,6 +137,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   spacer: {
-    height: spacing.md + spacing.xs + 23
+    height: spacing.md + spacing.xs + 146
   },
 });
