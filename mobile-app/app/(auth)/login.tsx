@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, StyleSheet } from 'react-native';
+import { View, TextInput, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Button } from '../../components/ui/Button';
 import { Text } from '../../components/ui/Typography';
@@ -109,14 +109,8 @@ export default function LoginScreen() {
           <View style={styles.divider} />
         </View>
 
-        <Button
-          title="Continue with Google"
-          onPress={handleGoogleLogin}
-          variant="outline"
-          size="large"
-          style={styles.googleButton}
-          disabled={isLoading}
-        />
+        {/* Replace Button with GoogleButton */}
+        <GoogleButton onPress={handleGoogleLogin} disabled={isLoading} />
 
         <View style={styles.forgotPasswordContainer}>
           <Button
@@ -130,6 +124,57 @@ export default function LoginScreen() {
         </View>
       </View>
     </View>
+  );
+}
+
+// Add GoogleButton component
+function GoogleButton({ onPress, disabled }: { onPress: () => void; disabled?: boolean }) {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={disabled}
+      activeOpacity={0.85}
+      style={[
+        {
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#fff',
+          borderColor: '#E0E0E0',
+          borderWidth: 1,
+          borderRadius: 8,
+          paddingVertical: 12,
+          paddingHorizontal: 16,
+          width: '70%',
+          marginBottom: 16,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.05,
+          shadowRadius: 2,
+          elevation: 1,
+          opacity: disabled ? 0.5 : 1,
+        },
+      ]}
+    >
+      <Image
+        source={require('../assets/google-logo.png')}
+        style={{ width: 22, height: 22, marginRight: 16 }}
+        resizeMode="contain"
+      />
+      <Text
+        style={{
+          color: '#4285F4',
+          fontWeight: '600',
+          fontSize: 16,
+          flex: 1,
+          textAlign: 'center',
+        }}
+      >
+        Continue with Google
+      </Text>
+      {/* Spacer for centering text */}
+      <View style={{ width: 38 }} />
+    </TouchableOpacity>
   );
 }
 

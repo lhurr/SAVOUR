@@ -42,10 +42,7 @@ async function main() {
     console.error('Error fetching rows:', error);
     process.exit(1);
   }
-  if (!rows || rows.length === 0) {
-    console.log('No rows found with missing embeddings.');
-    return;
-  }
+
   console.log(`Found ${rows.length} rows to update.`);
 
 //   let updatedCount = 0;
