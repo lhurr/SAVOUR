@@ -9,7 +9,6 @@ import { colors, spacing, shadows, borderRadius } from '../../constants/theme';
 
 interface InteractionStats {
   total_clicks: number;
-  total_views: number;
   total_favorites: number;
   unique_restaurants: number;
 }
@@ -123,13 +122,26 @@ export default function Profile() {
     });
   };
 
-  const StatCard = ({ title, value, color, icon }: { title: string; value: number; color: string; icon: string }) => (
-    <View style={[styles.statCard, { borderLeftColor: color }]}>
-      <View style={styles.statHeader}>
-        <Text style={styles.statIcon}>{icon}</Text>
-        <Text style={styles.statValue}>{value}</Text>
-      </View>
-      <Text style={styles.statLabel}>{title}</Text>
+  // StatCard: unified color, fixed size for all cards
+  const StatCard = ({ title, value, icon }: { title: string; value: number; icon: string }) => (
+    <View style={{
+      backgroundColor: colors.primary,
+      borderRadius: borderRadius.lg,
+      minHeight: 120,
+      maxHeight: 120,
+      width: 110,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginHorizontal: 4,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.10,
+      shadowRadius: 4,
+      elevation: 2,
+    }}>
+      <Text style={{ fontSize: 28, color: 'white', marginBottom: 4 }}>{icon}</Text>
+      <Text style={{ fontSize: 28, fontWeight: 'bold', color: 'white', marginBottom: 2 }}>{value}</Text>
+      <Text style={{ fontSize: 14, color: 'white', fontWeight: '600', textAlign: 'center' }}>{title}</Text>
     </View>
   );
 
@@ -240,29 +252,20 @@ export default function Profile() {
       {stats && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Activity Overview</Text>
-          <View style={styles.statsGrid}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: spacing.md, marginBottom: spacing.md }}>
             <StatCard 
               title="Restaurants Clicked" 
               value={stats.total_clicks} 
-              color="#007AFF" 
               icon="👆"
-            />
-            <StatCard 
-              title="Pages Viewed" 
-              value={stats.total_views} 
-              color="#34C759" 
-              icon="👁️"
             />
             <StatCard 
               title="Favorites" 
               value={stats.total_favorites} 
-              color="#FF3B30" 
               icon="❤️"
             />
             <StatCard 
               title="Unique Places" 
               value={stats.unique_restaurants} 
-              color="#FF9500" 
               icon="📍"
             />
           </View>
