@@ -14,14 +14,17 @@
   - [Features](#features)
   - [Demo](#demo)
   - [Tech Stack](#tech-stack)
-  - [Getting Started](#getting-started)
+    - [Frontend](#frontend)
+    - [Backend (AI Agent)](#backend-ai-agent)
+    - [Database \& Infrastructure](#database--infrastructure)
+  - [Local Setup](#local-setup)
 
 ---
 
 ## About
 Tired of visiting the same restaurants and cafes? Struggling to decide what and where to eat next?
 
-SAVOUR is here to fix that with a cross-platform application that utilises a powerful recommendation engine to take the guesswork out of choosing where to eat. Whether you're hunting for a hidden gem, the latest foodie hotspot, or an Insta-worthy café, SAVOUR effortlessly discovers and recommends your next favorite spot based on your budget, dietary needs, and location.
+SAVOUR is here to fix that with a mobile application that utilises a powerful recommendation engine to take the guesswork out of choosing where to eat. Whether you're hunting for a hidden gem, the latest foodie hotspot, or an Insta-worthy café, SAVOUR effortlessly discovers and recommends your next favorite spot based on your budget, dietary needs, and location.
 
 ---
 
@@ -39,16 +42,35 @@ SAVOUR is here to fix that with a cross-platform application that utilises a pow
 ---
 
 ## Demo
-[To be added after MS3] 
+TBC
 
 ---
 
 ## Tech Stack
-[To be added after MS2]
+
+### Frontend
+- **React Native** with **Expo** - Mobile development
+- **Expo Router** - File-based routing for React Native
+- **NativeWind** - Tailwind CSS for React Native
+- **React Native Maps** - Map integration with OpenStreetMap
+
+### Backend (AI Agent)
+- **LangGraph** - Agent orchestration framework
+- **Google Gemini** - Advanced language model
+- **FastAPI** - High-performance web framework
+- **Redis** - Caching and session management
+- **OpenAI API** - Vector embeddings for recommendations
+
+### Database & Infrastructure
+- **Supabase** - Backend-as-a-Service (PostgreSQL + Auth + Real-time)
+- **PostgreSQL** - Primary database with Row Level Security (RLS)
+- **Supabase Auth** - Authentication and user management
+
+
 
 ---
 
-## Getting Started
+## Local Setup
 
 Follow these steps to set up SAVOUR on your local machine:
 
@@ -59,8 +81,8 @@ Follow these steps to set up SAVOUR on your local machine:
    ```
 
 2. **Fetch API Keys**
-   You'll need to obtain the following API keys:
-   - Supabase credentials (Contact for access to these keys)
+   Get the following API keys:
+   - Supabase credentials
    - GEMINI_API_KEY (Gemini API key)
 
 3. **Set Up Environment Variables**
