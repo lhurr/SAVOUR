@@ -341,6 +341,11 @@ export class RestaurantService {
       .select('embedding, interaction_type')
       .eq('user_id', user.id);
 
+    if (interactions && interactions.length > 0) {
+      console.log('FIRST EMBEDDING:', interactions[0].embedding, 'TYPE:', typeof interactions[0].embedding);
+    }
+
+
     if (error) {
       throw error;
     }
@@ -349,7 +354,17 @@ export class RestaurantService {
 
     // Assign weights and filter out missing embeddings
     const weightedEmbeddings: { vector: number[]; weight: number }[] = interactions
-      .filter((row: any) => Array.isArray(row.embedding) && row.embedding.length > 0)
+      .filter((row: any) => {
+        // Parse if string
+        if (typeof row.embedding === 'string') {
+          try {
+            row.embedding = JSON.parse(row.embedding);
+          } catch (e) {
+            return false;
+          }
+        }
+        return Array.isArray(row.embedding) && row.embedding.length > 0;
+      })
       .map((row: any) => ({
         vector: row.embedding,
         weight: row.interaction_type === 'favorite' ? 10 : 1

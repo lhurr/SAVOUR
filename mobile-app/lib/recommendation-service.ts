@@ -93,7 +93,7 @@ export class RecommendationService {
     try {
       // Get user's taste profile vector
       const userTasteVector = await RestaurantService.getUserTasteProfileVector();
-      
+      console.log('USER TASTE PROFILE VECTOR:', userTasteVector);
       if (!userTasteVector) {
         // If no taste profile, return nearby restaurants sorted by distance
         const nearbyRestaurants = await this.fetchNearbyRestaurants(location, maxDistance);

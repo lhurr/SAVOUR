@@ -31,7 +31,7 @@ export default function HomeScreen() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [selectedCuisineFilter, setSelectedCuisineFilter] = useState('all');
-  const [selectedDistanceFilter, setSelectedDistanceFilter] = useState('2km');
+  const [selectedDistanceFilter, setSelectedDistanceFilter] = useState('1km');
 
   const fetchRecommendations = async (location: UserLocation) => {
     try {
