@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { StyleSheet, View, ActivityIndicator, Alert, Platform, Text, Linking, Pressable, TouchableOpacity } from 'react-native';
 import * as Location from 'expo-location';
 import MapView, { Marker, Callout } from 'react-native-maps';
@@ -225,6 +225,7 @@ export default function MapScreen() {
     }
   };
 
+  // Log a 'click' only when 'View Details' is pressed
   const handleInfoPress = async (placeName: string, address: string, cuisine?: string) => {
     try {
       await RestaurantService.recordInteraction(
@@ -234,9 +235,8 @@ export default function MapScreen() {
         'click'
       );
     } catch (error) {
-      console.error('err recording interaction:', error);
+      // Optionally handle error
     }
-
     router.push({
       pathname: '/restaurant-info',
       params: { name: placeName, address: address }

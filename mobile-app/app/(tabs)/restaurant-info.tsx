@@ -56,20 +56,6 @@ export default function RestaurantInfo() {
         setEvents([]);
         setFinalAnswer('');
 
-        // record a view interaction
-        if (name || address) {
-          try {
-            await RestaurantService.recordInteraction(
-              name as string || '',
-              address as string || '',
-              '', 
-              'view'
-            );
-          } catch (error) {
-            console.error('Error recording view interaction:', error);
-          }
-        }
-
         // Don't make API call if we don't have any restaurant information
         if (!name && !address) {
           setEvents(prev => [...prev, {

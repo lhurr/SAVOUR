@@ -3,6 +3,7 @@ import {
   UserRestaurantInteraction, 
   TABLES 
 } from './types';
+import { getOpenAIEmbedding } from './embedding-api';
 
 export class RestaurantService {
   static async recordInteraction(
@@ -16,6 +17,15 @@ export class RestaurantService {
       throw new Error('User not authenticated');
     }
 
+    // Prepare string for embedding
+    const inputString = restaurantCuisine
+      ? `${restaurantName} serving ${restaurantCuisine} food`
+      : restaurantName;
+    let embedding: number[] | null = null;
+    try {
+      embedding = await getOpenAIEmbedding(inputString);
+    } catch (e) {}
+
     const { data, error } = await supabase
       .from(TABLES.USER_RESTAURANT_INTERACTIONS)
       .insert({
@@ -24,13 +34,13 @@ export class RestaurantService {
         restaurant_address: restaurantAddress,
         restaurant_cuisine: restaurantCuisine,
         interaction_type: interactionType,
-        interaction_date: new Date().toISOString()
+        interaction_date: new Date().toISOString(),
+        embedding,
       })
       .select()
       .single();
 
     if (error) {
-      console.error('Error recording interaction:', error);
       throw error;
     }
 
@@ -171,7 +181,7 @@ export class RestaurantService {
   }
 
   // Toggle favorite status
-  static async toggleFavorite(restaurantName: string, restaurantAddress: string) {
+  static async toggleFavorite(restaurantName: string, restaurantAddress: string, restaurantCuisine?: string) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       throw new Error('User not authenticated');
@@ -211,17 +221,26 @@ export class RestaurantService {
         .eq('id', existing.id);
 
       if (error) {
-        console.error('Error removing favorite:', error);
         throw error;
       }
 
       return { isFavorite: false };
     } else {
       // add to favorites
+      // Prepare string for embedding
+      const inputString = restaurantCuisine
+        ? `${restaurantName} serving ${restaurantCuisine} food`
+        : restaurantName;
+      let embedding: number[] | null = null;
+      try {
+        embedding = await getOpenAIEmbedding(inputString);
+      } catch (e) {}
+
       const insertData: any = {
         user_id: user.id,
         interaction_type: 'favorite',
-        interaction_date: new Date().toISOString()
+        interaction_date: new Date().toISOString(),
+        embedding,
       };
 
       if (restaurantName) {
@@ -229,6 +248,9 @@ export class RestaurantService {
       }
       if (restaurantAddress) {
         insertData.restaurant_address = restaurantAddress;
+      }
+      if (restaurantCuisine) {
+        insertData.restaurant_cuisine = restaurantCuisine;
       }
 
       const { data, error } = await supabase
@@ -238,7 +260,6 @@ export class RestaurantService {
         .single();
 
       if (error) {
-        console.error('Error adding favorite:', error);
         throw error;
       }
 
@@ -271,5 +292,48 @@ export class RestaurantService {
     };
 
     return stats;
+  }
+
+  // Calculate the user's taste profile vector as a weighted average of their restaurant embeddings
+  static async getUserTasteProfileVector(): Promise<number[] | null> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
+    const { data, error } = await supabase
+      .from(TABLES.USER_RESTAURANT_INTERACTIONS)
+      .select('embedding, interaction_type')
+      .eq('user_id', user.id);
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data || data.length === 0) return null;
+
+    // Assign weights and filter out missing embeddings
+    const weightedEmbeddings: { vector: number[]; weight: number }[] = data
+      .filter((row: any) => Array.isArray(row.embedding) && row.embedding.length > 0)
+      .map((row: any) => ({
+        vector: row.embedding,
+        weight: row.interaction_type === 'favorite' ? 10 : 1
+      }));
+
+    if (weightedEmbeddings.length === 0) return null;
+
+    // Calculate weighted average
+    const vectorLength = weightedEmbeddings[0].vector.length;
+    const sumVector = new Array(vectorLength).fill(0);
+    let totalWeight = 0;
+    for (const { vector, weight } of weightedEmbeddings) {
+      for (let i = 0; i < vectorLength; i++) {
+        sumVector[i] += vector[i] * weight;
+      }
+      totalWeight += weight;
+    }
+    if (totalWeight === 0) return null;
+    const userVector = sumVector.map(v => v / totalWeight);
+    return userVector;
   }
 } 
