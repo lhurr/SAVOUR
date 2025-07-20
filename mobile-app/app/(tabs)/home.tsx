@@ -41,11 +41,10 @@ export default function HomeScreen() {
       const tasteVector = await RestaurantService.getUserTasteProfileVector();
       setHasTasteProfile(!!tasteVector);
       
-      // Get recommendations
       const recs = await RecommendationService.getRestaurantRecommendations(
         location,
         getDistanceInMeters(selectedDistanceFilter),
-        10 // top 20 recommendations
+        10 // top 10 recommendations
       );
       
       setRecommendations(recs);
@@ -72,11 +71,32 @@ export default function HomeScreen() {
       
       const results = await RecommendationService.getSemanticRecommendations(
         query,
-        0.7, // Lower threshold for search
-        15 // More results for search
+        0.3, 
+        20 
       );
       
-      setSearchResults(results);
+      const uniqueResults = results.reduce((acc: any[], result: any) => {
+        const key = `${result.restaurant_name}-${result.restaurant_address}`;
+        const existingIndex = acc.findIndex(item => 
+          `${item.restaurant_name}-${item.restaurant_address}` === key
+        );
+        
+        if (existingIndex === -1) {
+          acc.push(result);
+        } else {
+          if (result.similarity > acc[existingIndex].similarity) {
+            acc[existingIndex] = result;
+          }
+        }
+        
+        return acc;
+      }, []);
+      
+      const sortedResults = uniqueResults
+        .sort((a, b) => b.similarity - a.similarity)
+        .slice(0, 10);
+      
+      setSearchResults(sortedResults);
     } catch (error) {
       console.error('Error searching:', error);
       Alert.alert('Error', 'Failed to search. Please try again.');

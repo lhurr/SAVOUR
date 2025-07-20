@@ -342,7 +342,7 @@ export class RestaurantService {
       .eq('user_id', user.id);
 
     if (interactions && interactions.length > 0) {
-      console.log('FIRST EMBEDDING:', interactions[0].embedding, 'TYPE:', typeof interactions[0].embedding);
+      // console.log('FIRST EMBEDDING:', interactions[0].embedding, 'TYPE:', typeof interactions[0].embedding);
     }
 
 
