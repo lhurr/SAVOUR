@@ -45,7 +45,7 @@ export default function HomeScreen() {
       const recs = await RecommendationService.getRestaurantRecommendations(
         location,
         getDistanceInMeters(selectedDistanceFilter),
-        20 // top 20 recommendations
+        10 // top 20 recommendations
       );
       
       setRecommendations(recs);
