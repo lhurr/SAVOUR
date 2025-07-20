@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 
+
+// Script to backfill embeddings for user_restaurant_interactions table
+// Run with: node scripts/backfill-embeddings.js
+
 import { createClient } from '@supabase/supabase-js';
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
