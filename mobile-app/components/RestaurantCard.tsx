@@ -122,7 +122,7 @@ export default function RestaurantCard({
           </TouchableOpacity>
         )}
         
-        <TouchableOpacity style={styles.detailsButton}>
+        <TouchableOpacity style={styles.detailsButton} onPress={handlePress}>
           <Text style={styles.detailsText}>View Details →</Text>
         </TouchableOpacity>
       </View>
