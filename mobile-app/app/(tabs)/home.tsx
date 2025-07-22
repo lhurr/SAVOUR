@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  StyleSheet, 
-  ScrollView, 
-  RefreshControl, 
-  ActivityIndicator, 
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  RefreshControl,
+  ActivityIndicator,
   Alert,
   TouchableOpacity,
   Text
@@ -36,17 +36,17 @@ export default function HomeScreen() {
   const fetchRecommendations = async (location: UserLocation) => {
     try {
       setLoading(true);
-      
+
       // Check if user has a taste profile
       const tasteVector = await RestaurantService.getUserTasteProfileVector();
       setHasTasteProfile(!!tasteVector);
-      
+
       const recs = await RecommendationService.getRestaurantRecommendations(
         location,
         getDistanceInMeters(selectedDistanceFilter),
         10 // top 10 recommendations
       );
-      
+
       setRecommendations(recs);
     } catch (error) {
       console.error('Error fetching recommendations:', error);
@@ -68,19 +68,19 @@ export default function HomeScreen() {
     try {
       setSearchLoading(true);
       setIsSearchMode(true);
-      
+
       const results = await RecommendationService.getSemanticRecommendations(
         query,
-        0.3, 
-        20 
+        0.3,
+        20
       );
-      
+
       const uniqueResults = results.reduce((acc: any[], result: any) => {
         const key = `${result.restaurant_name}-${result.restaurant_address}`;
-        const existingIndex = acc.findIndex(item => 
+        const existingIndex = acc.findIndex(item =>
           `${item.restaurant_name}-${item.restaurant_address}` === key
         );
-        
+
         if (existingIndex === -1) {
           acc.push(result);
         } else {
@@ -88,14 +88,14 @@ export default function HomeScreen() {
             acc[existingIndex] = result;
           }
         }
-        
+
         return acc;
       }, []);
-      
+
       const sortedResults = uniqueResults
         .sort((a, b) => b.similarity - a.similarity)
         .slice(0, 10);
-      
+
       setSearchResults(sortedResults);
     } catch (error) {
       console.error('Error searching:', error);
@@ -183,7 +183,7 @@ export default function HomeScreen() {
     <View style={styles.header}>
 
 
-      <SearchBar 
+      <SearchBar
         onSearch={handleSearch}
         loading={searchLoading}
       />
@@ -201,7 +201,7 @@ export default function HomeScreen() {
             }}
             title="Distance"
           />
-          
+
           <FilterBar
             filters={cuisineFilters}
             selectedFilter={selectedCuisineFilter}
@@ -222,7 +222,7 @@ export default function HomeScreen() {
                 Nearby Restaurants
               </ThemedText>
             </View>
-            
+
             <View style={styles.statCard}>
               <ThemedText variant="h3" color={colors.text.primary.dark} center>
                 {hasTasteProfile ? '✓' : '?'}
@@ -238,7 +238,7 @@ export default function HomeScreen() {
               {hasTasteProfile ? 'Personalized Recommendations' : 'Nearby Restaurants'}
             </ThemedText>
             <ThemedText variant="body" color={colors.text.secondary.dark}>
-              {hasTasteProfile 
+              {hasTasteProfile
                 ? 'Based on your dining preferences and location'
                 : 'Explore restaurants near you to build your taste profile'
               }
@@ -347,12 +347,12 @@ export default function HomeScreen() {
     }
 
     // Filter recommendations by cuisine if not "all"
-    const filteredRecommendations = selectedCuisineFilter === 'all' 
-      ? recommendations 
-      : recommendations.filter(restaurant => 
-          restaurant.cuisine && 
-          restaurant.cuisine.toLowerCase().includes(selectedCuisineFilter.toLowerCase())
-        );
+    const filteredRecommendations = selectedCuisineFilter === 'all'
+      ? recommendations
+      : recommendations.filter(restaurant =>
+        restaurant.cuisine &&
+        restaurant.cuisine.toLowerCase().includes(selectedCuisineFilter.toLowerCase())
+      );
 
     return (
       <View style={styles.recommendationsContainer}>
