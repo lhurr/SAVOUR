@@ -1,21 +1,21 @@
 export async function getOpenAIEmbedding(text: string): Promise<number[]> {
-  const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
-  if (!apiKey) throw new Error('OpenAI API key not set');
+  const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseKey) throw new Error('Supabase anon key not set');
 
-  const response = await fetch('https://api.openai.com/v1/embeddings', {
+  const response = await fetch('https://inywlsnrkrkoyhhtmbgq.supabase.co/functions/v1/embed', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${supabaseKey}`,
     },
-    body: JSON.stringify({
-      model: 'text-embedding-3-small',
-      input: text
-    })
+    body: JSON.stringify({ text }),
   });
-  const data = await response.json();
-  if (!data.data || !data.data[0] || !data.data[0].embedding) {
-    throw new Error('Failed to get embedding from OpenAI');
+  if (!response.ok) {
+    throw new Error(`Failed to get embedding from Supabase Edge Function: ${response.status} ${response.statusText}`);
   }
-  return data.data[0].embedding;
+  const data = await response.json();
+  if (!data.embedding || !Array.isArray(data.embedding)) {
+    throw new Error('Invalid embedding response from Supabase Edge Function');
+  }
+  return data.embedding;
 } 
