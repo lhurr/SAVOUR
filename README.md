@@ -18,6 +18,9 @@
     - [Backend (AI Agent)](#backend-ai-agent)
     - [Database \& Infrastructure](#database--infrastructure)
   - [Local Setup](#local-setup)
+  - [Unit Testing](#unit-testing)
+    - [Frontend Testing](#frontend-testing)
+    - [Test Configuration](#test-configuration)
 
 ---
 
@@ -59,7 +62,7 @@ TBC
 - **Google Gemini** - Advanced language model
 - **FastAPI** - High-performance web framework
 - **Redis** - Caching and session management
-- **OpenAI API** - Vector embeddings for recommendations
+- **Supabase Edge Functions + OpenAI API** - For vector embeddings under recsys
 
 ### Database & Infrastructure
 - **Supabase** - Backend-as-a-Service (PostgreSQL + Auth + Real-time)
@@ -108,5 +111,70 @@ Follow these steps to set up SAVOUR on your local machine:
    - Scan the QR code with your phone (requires Expo Go app)
    - Press `w` to open in web browser
 
+---
+
+## Unit Testing
+
+The backend uses **pytest** with comprehensive mocking for external dependencies.
+
+```bash
+# Navigate to backend directory
+cd backend
+
+# Install test dependencies
+pip install -e ".[dev]"
+
+# Set environment variable 
+export GEMINI_API_KEY="your-api-key-here"
+
+# Run all tests
+python -m pytest tests/ -v
+
+# Run with coverage report
+python -m pytest tests/ -v --cov=src --cov-report=html --cov-report=term
+```
+
+**Backend Test Coverage:**
+- FastAPI endpoints (`test_app.py`)
+- Utility functions (`test_utils.py`)
+- State management (`test_state.py`)
+- Integration tests (`test_integration.py`)
+
+### Frontend Testing
+
+The frontend uses **Jest** with **React Native Testing Library** for component and hook testing.
+
+```bash
+# Navigate to mobile app directory
+cd mobile-app
+
+# Install test dependencies
+npm install
+
+# Run all tests
+npm test
+```
+
+**Frontend Test Coverage:**
+- React Native components
+- Custom hooks (location, API calls)
+- Database operations
+- API service functions
+- Screen navigation
+
+
+### Test Configuration
+
+**Backend Configuration:**
+- `pytest.ini` - Test discovery and markers
+- `conftest.py` - Shared fixtures and mocks
+- `.env.test` - Test environment variables
+
+**Frontend Configuration:**
+- `jest.config.js` - Jest configuration
+- `jest.setup.js` - Global test setup and mocks
+
+
+---
 
 > Thank you for trying out SAVOUR, we appreciate any and all feedback!
