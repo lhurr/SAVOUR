@@ -1,14 +1,14 @@
-# SAVOUR 🍽️
-
-> Find your next go-to grub with SAVOUR
+# SAVOUR 🍽️ -- Find your next go-to grub with SAVOUR
 
 ---
 
-![SAVOUR Logo](./assets/SAVOUR.png)
+<div align="center">
+  <img src="./assets/SAVOUR.png" alt="SAVOUR Logo" width="300" />
+</div>
 
 ## Table of Contents
 
-- [SAVOUR 🍽️](#savour-️)
+- [SAVOUR 🍽️ -- Find your next go-to grub with SAVOUR](#savour-️----find-your-next-go-to-grub-with-savour)
   - [Table of Contents](#table-of-contents)
   - [About](#about)
   - [Features](#features)
