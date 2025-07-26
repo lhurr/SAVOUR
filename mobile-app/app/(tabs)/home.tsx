@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   Alert,
   TouchableOpacity,
-  Text
 } from 'react-native';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';

@@ -3,7 +3,7 @@
 ---
 
 <div align="center">
-  <img src="./assets/SAVOUR.png" alt="SAVOUR Logo" width="300" />
+  <img src="./assets/README.png" alt="SAVOUR Logo" width="300" />
 </div>
 
 ## Table of Contents
