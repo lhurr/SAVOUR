@@ -15,7 +15,7 @@ import { Text as ThemedText } from '../../components/ui/Typography';
 import RestaurantCard from '../../components/RestaurantCard';
 import SearchBar from '../../components/SearchBar';
 import FilterBar, { FilterOption } from '../../components/FilterBar';
-import QuickActionButton from '../../components/QuickActionButton';
+// import QuickActionButton from '../../components/QuickActionButton';
 import { colors, spacing, typography, borderRadius, shadows } from '../../constants/theme';
 import { RecommendationService, RecommendedRestaurant, Location as UserLocation } from '../../lib/recommendation-service';
 import { RestaurantService } from '../../lib/database';
@@ -31,7 +31,7 @@ export default function HomeScreen() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [selectedCuisineFilter, setSelectedCuisineFilter] = useState('all');
-  const [selectedDistanceFilter, setSelectedDistanceFilter] = useState('1km');
+  const [selectedDistanceFilter, setSelectedDistanceFilter] = useState('500m');
 
   const fetchRecommendations = async (location: UserLocation) => {
     try {
@@ -123,19 +123,19 @@ export default function HomeScreen() {
   ];
 
   const distanceFilters: FilterOption[] = [
+    { label: '500m', value: '500m' },
     { label: '1km', value: '1km' },
     { label: '2km', value: '2km' },
-    { label: '5km', value: '5km' },
-    { label: '10km', value: '10km' },
   ];
 
   const getDistanceInMeters = (distanceFilter: string): number => {
     switch (distanceFilter) {
+      case '500m': return 500;
       case '1km': return 1000;
       case '2km': return 2000;
       case '5km': return 5000;
       case '10km': return 10000;
-      default: return 2000;
+      default: return 500;
     }
   };
 
