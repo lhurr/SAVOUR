@@ -1,10 +1,10 @@
 # SAVOUR 🍽️
 
-> Find your next go-to grub with SAVOUR by BiteDunce
+> Find your next go-to grub with SAVOUR
 
 ---
 
-![SAVOUR Logo](./assets/SAVOUR_LOGO.jpeg)
+![SAVOUR Logo](./assets/SAVOUR.png)
 
 ## Table of Contents
 
@@ -177,4 +177,4 @@ npm test
 
 ---
 
-> Thank you for trying out SAVOUR, we appreciate any and all feedback!
+**SAVOUR** - Making restaurant discovery effortless through intelligent recommendations.
