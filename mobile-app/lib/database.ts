@@ -1,31 +1,38 @@
-import { supabase } from './supabase';
-import { 
-  UserRestaurantInteraction, 
-  TABLES 
-} from './types';
-import { getOpenAIEmbedding } from './embedding-api';
+import { supabase } from "./supabase";
+import { UserRestaurantInteraction, TABLES } from "./types";
+import { getOpenAIEmbedding } from "./embedding-api";
 
-async function getRestaurantSummaryFromEdge(restaurantName: string, restaurantCuisine?: string): Promise<string> {
+async function getRestaurantSummaryFromEdge(
+  restaurantName: string,
+  restaurantCuisine?: string
+): Promise<string> {
   let prompt: string;
   if (restaurantCuisine) {
     prompt = `Write a concise, one-sentence summary describing the food, atmosphere, or unique qualities of the restaurant '${restaurantName}', which serves ${restaurantCuisine} cuisine.`;
   } else {
     prompt = `Write a concise, one-sentence summary describing the food, atmosphere, or unique qualities of the restaurant '${restaurantName}'.`;
   }
-  const response = await fetch('https://inywlsnrkrkoyhhtmbgq.supabase.co/functions/v1/openai', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY}`,
-    },
-    body: JSON.stringify({ query: prompt }),
-  });
-  
+  const response = await fetch(
+    "https://inywlsnrkrkoyhhtmbgq.supabase.co/functions/v1/openai",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({ query: prompt }),
+    }
+  );
+
   if (!response.ok) {
-    console.error('Error getting summary from Edge Function:', response.status, response.statusText);
-    throw new Error('Failed to get summary from Edge Function');
+    console.error(
+      "Error getting summary from Edge Function:",
+      response.status,
+      response.statusText
+    );
+    throw new Error("Failed to get summary from Edge Function");
   }
-  
+
   return (await response.text()).trim();
 }
 
@@ -34,22 +41,25 @@ export class RestaurantService {
     restaurantName: string,
     restaurantAddress: string,
     restaurantCuisine: string,
-    interactionType: 'click' | 'view' | 'favorite'
+    interactionType: "click" | "view" | "favorite"
   ) {
     const { data } = await supabase.auth.getUser();
     const user = data?.user;
     if (!user) {
-      throw new Error('User not authenticated');
+      throw new Error("User not authenticated");
     }
 
     // Generate summary and embedding
     let summary: string | null = null;
     let embedding: number[] | null = null;
     try {
-      summary = await getRestaurantSummaryFromEdge(restaurantName, restaurantCuisine);
+      summary = await getRestaurantSummaryFromEdge(
+        restaurantName,
+        restaurantCuisine
+      );
       embedding = await getOpenAIEmbedding(summary);
     } catch (e) {
-      console.error('Error generating summary:', e);
+      console.error("Error generating summary:", e);
     }
 
     const { data: insertedData, error } = await supabase
@@ -62,7 +72,7 @@ export class RestaurantService {
         interaction_type: interactionType,
         interaction_date: new Date().toISOString(),
         embedding,
-        summary, 
+        summary,
       })
       .select()
       .single();
@@ -78,39 +88,41 @@ export class RestaurantService {
     const { data } = await supabase.auth.getUser();
     const user = data?.user;
     if (!user) {
-      throw new Error('User not authenticated');
+      throw new Error("User not authenticated");
     }
 
     const { data: interactions, error } = await supabase
       .from(TABLES.USER_RESTAURANT_INTERACTIONS)
-      .select('*')
-      .eq('user_id', user.id)
-      .order('interaction_date', { ascending: false });
+      .select("*")
+      .eq("user_id", user.id)
+      .order("interaction_date", { ascending: false });
 
     if (error) {
-      console.error('Error fetching user interactions:', error);
+      console.error("Error fetching user interactions:", error);
       throw error;
     }
 
     return interactions || [];
   }
 
-  static async getInteractionsByType(interactionType: 'click' | 'view' | 'favorite') {
+  static async getInteractionsByType(
+    interactionType: "click" | "view" | "favorite"
+  ) {
     const { data } = await supabase.auth.getUser();
     const user = data?.user;
     if (!user) {
-      throw new Error('User not authenticated');
+      throw new Error("User not authenticated");
     }
 
     const { data: interactions, error } = await supabase
       .from(TABLES.USER_RESTAURANT_INTERACTIONS)
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('interaction_type', interactionType)
-      .order('interaction_date', { ascending: false });
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("interaction_type", interactionType)
+      .order("interaction_date", { ascending: false });
 
     if (error) {
-      console.error('Error fetching interactions by type:', error);
+      console.error("Error fetching interactions by type:", error);
       throw error;
     }
 
@@ -121,45 +133,55 @@ export class RestaurantService {
     const { data } = await supabase.auth.getUser();
     const user = data?.user;
     if (!user) {
-      throw new Error('User not authenticated');
+      throw new Error("User not authenticated");
     }
 
     const { data: interactions, error } = await supabase
       .from(TABLES.USER_RESTAURANT_INTERACTIONS)
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('interaction_type', 'click')
-      .order('interaction_date', { ascending: false })
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("interaction_type", "click")
+      .order("interaction_date", { ascending: false })
       .limit(limit);
 
     if (error) {
-      console.error('Error fetching recent restaurants:', error);
+      console.error("Error fetching recent restaurants:", error);
       throw error;
     }
 
     return interactions || [];
   }
 
-  static async getRecentRestaurantsPaginated(page: number = 1, pageSize: number = 5) {
+  static async getRecentRestaurantsPaginated(
+    page: number = 1,
+    pageSize: number = 5
+  ) {
     const { data } = await supabase.auth.getUser();
     const user = data?.user;
     if (!user) {
-      throw new Error('User not authenticated');
+      throw new Error("User not authenticated");
     }
 
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
-    const { data: interactions, error, count } = await supabase
+    const {
+      data: interactions,
+      error,
+      count,
+    } = await supabase
       .from(TABLES.USER_RESTAURANT_INTERACTIONS)
-      .select('*', { count: 'exact' })
-      .eq('user_id', user.id)
-      .eq('interaction_type', 'click')
-      .order('interaction_date', { ascending: false })
+      .select("*", { count: "exact" })
+      .eq("user_id", user.id)
+      .eq("interaction_type", "click")
+      .order("interaction_date", { ascending: false })
       .range(from, to);
 
     if (error) {
-      console.error('Error fetching recent restaurants with pagination:', error);
+      console.error(
+        "Error fetching recent restaurants with pagination:",
+        error
+      );
       throw error;
     }
 
@@ -169,36 +191,46 @@ export class RestaurantService {
       currentPage: page,
       totalPages: Math.ceil((count || 0) / pageSize),
       hasNextPage: page * pageSize < (count || 0),
-      hasPrevPage: page > 1
+      hasPrevPage: page > 1,
     };
   }
 
   // favorite restaurants
   static async getFavoriteRestaurants() {
-    return this.getInteractionsByType('favorite');
+    return this.getInteractionsByType("favorite");
   }
 
   // favorite restaurants with pagination
-  static async getFavoriteRestaurantsPaginated(page: number = 1, pageSize: number = 5) {
+  static async getFavoriteRestaurantsPaginated(
+    page: number = 1,
+    pageSize: number = 5
+  ) {
     const { data } = await supabase.auth.getUser();
     const user = data?.user;
     if (!user) {
-      throw new Error('User not authenticated');
+      throw new Error("User not authenticated");
     }
 
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
-    const { data: interactions, error, count } = await supabase
+    const {
+      data: interactions,
+      error,
+      count,
+    } = await supabase
       .from(TABLES.USER_RESTAURANT_INTERACTIONS)
-      .select('*', { count: 'exact' })
-      .eq('user_id', user.id)
-      .eq('interaction_type', 'favorite')
-      .order('interaction_date', { ascending: false })
+      .select("*", { count: "exact" })
+      .eq("user_id", user.id)
+      .eq("interaction_type", "favorite")
+      .order("interaction_date", { ascending: false })
       .range(from, to);
 
     if (error) {
-      console.error('Error fetching favorite restaurants with pagination:', error);
+      console.error(
+        "Error fetching favorite restaurants with pagination:",
+        error
+      );
       throw error;
     }
 
@@ -208,41 +240,45 @@ export class RestaurantService {
       currentPage: page,
       totalPages: Math.ceil((count || 0) / pageSize),
       hasNextPage: page * pageSize < (count || 0),
-      hasPrevPage: page > 1
+      hasPrevPage: page > 1,
     };
   }
 
   // Toggle favorite status
-  static async toggleFavorite(restaurantName: string, restaurantAddress: string, restaurantCuisine?: string) {
+  static async toggleFavorite(
+    restaurantName: string,
+    restaurantAddress: string,
+    restaurantCuisine?: string
+  ) {
     const { data } = await supabase.auth.getUser();
     const user = data?.user;
     if (!user) {
-      throw new Error('User not authenticated');
+      throw new Error("User not authenticated");
     }
 
     // at least one identifier
     if (!restaurantName && !restaurantAddress) {
-      throw new Error('At least restaurant name or address is required');
+      throw new Error("At least restaurant name or address is required");
     }
 
     // query based on available data
     let query = supabase
       .from(TABLES.USER_RESTAURANT_INTERACTIONS)
       .select()
-      .eq('user_id', user.id)
-      .eq('interaction_type', 'favorite');
+      .eq("user_id", user.id)
+      .eq("interaction_type", "favorite");
 
     if (restaurantName && restaurantAddress) {
       // exact match
       query = query
-        .eq('restaurant_name', restaurantName)
-        .eq('restaurant_address', restaurantAddress);
+        .eq("restaurant_name", restaurantName)
+        .eq("restaurant_address", restaurantAddress);
     } else if (restaurantName) {
       // match by name
-      query = query.eq('restaurant_name', restaurantName);
+      query = query.eq("restaurant_name", restaurantName);
     } else if (restaurantAddress) {
       // match by address
-      query = query.eq('restaurant_address', restaurantAddress);
+      query = query.eq("restaurant_address", restaurantAddress);
     }
 
     const { data: existing } = await query.single();
@@ -251,7 +287,7 @@ export class RestaurantService {
       const { error } = await supabase
         .from(TABLES.USER_RESTAURANT_INTERACTIONS)
         .delete()
-        .eq('id', existing.id);
+        .eq("id", existing.id);
 
       if (error) {
         throw error;
@@ -271,7 +307,7 @@ export class RestaurantService {
 
       const insertData: any = {
         user_id: user.id,
-        interaction_type: 'favorite',
+        interaction_type: "favorite",
         interaction_date: new Date().toISOString(),
         embedding,
       };
@@ -305,27 +341,98 @@ export class RestaurantService {
     const { data } = await supabase.auth.getUser();
     const user = data?.user;
     if (!user) {
-      throw new Error('User not authenticated');
+      throw new Error("User not authenticated");
     }
 
     const { data: interactions, error } = await supabase
       .from(TABLES.USER_RESTAURANT_INTERACTIONS)
-      .select('interaction_type, restaurant_name, restaurant_address')
-      .eq('user_id', user.id);
+      .select("interaction_type, restaurant_name, restaurant_address")
+      .eq("user_id", user.id);
 
     if (error) {
-      console.error('Error fetching interaction stats:', error);
+      console.error("Error fetching interaction stats:", error);
       throw error;
     }
 
     const stats = {
-      total_clicks: interactions.filter(d => d.interaction_type === 'click').length,
-      total_views: interactions.filter(d => d.interaction_type === 'view').length,
-      total_favorites: interactions.filter(d => d.interaction_type === 'favorite').length,
-      unique_restaurants: new Set(interactions.map(d => `${d.restaurant_name}-${d.restaurant_address || ''}`)).size
+      total_clicks: interactions.filter((d) => d.interaction_type === "click")
+        .length,
+      total_views: interactions.filter((d) => d.interaction_type === "view")
+        .length,
+      total_favorites: interactions.filter(
+        (d) => d.interaction_type === "favorite"
+      ).length,
+      unique_restaurants: new Set(
+        interactions.map(
+          (d) => `${d.restaurant_name}-${d.restaurant_address || ""}`
+        )
+      ).size,
     };
 
     return stats;
+  }
+
+  // Delete a specific interaction
+  static async deleteInteraction(interactionId: string) {
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user;
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+
+    const { error } = await supabase
+      .from(TABLES.USER_RESTAURANT_INTERACTIONS)
+      .delete()
+      .eq("id", interactionId)
+      .eq("user_id", user.id);
+
+    if (error) {
+      throw error;
+    }
+
+    return { success: true };
+  }
+
+  // Delete all favorites
+  static async deleteAllFavorites() {
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user;
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+
+    const { error } = await supabase
+      .from(TABLES.USER_RESTAURANT_INTERACTIONS)
+      .delete()
+      .eq("user_id", user.id)
+      .eq("interaction_type", "favorite");
+
+    if (error) {
+      throw error;
+    }
+
+    return { success: true };
+  }
+
+  // Delete all recent visits (clicks)
+  static async deleteAllRecentVisits() {
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user;
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+
+    const { error } = await supabase
+      .from(TABLES.USER_RESTAURANT_INTERACTIONS)
+      .delete()
+      .eq("user_id", user.id)
+      .eq("interaction_type", "click");
+
+    if (error) {
+      throw error;
+    }
+
+    return { success: true };
   }
 
   // Calculate the user's taste profile vector as a weighted average of their restaurant embeddings
@@ -333,18 +440,26 @@ export class RestaurantService {
     const { data } = await supabase.auth.getUser();
     const user = data?.user;
     if (!user) {
-      throw new Error('User not authenticated');
+      throw new Error("User not authenticated");
     }
 
     const { data: interactions, error } = await supabase
       .from(TABLES.USER_RESTAURANT_INTERACTIONS)
-      .select('embedding, interaction_type')
-      .eq('user_id', user.id);
+      .select(
+        "embedding, interaction_type, restaurant_name, restaurant_cuisine"
+      )
+      .eq("user_id", user.id)
+      .in("interaction_type", ["favorite", "click"]);
 
     if (interactions && interactions.length > 0) {
-      // console.log('FIRST EMBEDDING:', interactions[0].embedding, 'TYPE:', typeof interactions[0].embedding);
+      interactions.forEach((interaction, index) => {
+        console.log(
+          `${index + 1}. ${interaction.restaurant_name} (${
+            interaction.restaurant_cuisine || "no cuisine"
+          }) - ${interaction.interaction_type}`
+        );
+      });
     }
-
 
     if (error) {
       throw error;
@@ -353,22 +468,28 @@ export class RestaurantService {
     if (!interactions || interactions.length === 0) return null;
 
     // Assign weights and filter out missing embeddings
-    const weightedEmbeddings: { vector: number[]; weight: number }[] = interactions
-      .filter((row: any) => {
-        // Parse if string
-        if (typeof row.embedding === 'string') {
-          try {
-            row.embedding = JSON.parse(row.embedding);
-          } catch (e) {
-            return false;
+    const weightedEmbeddings: { vector: number[]; weight: number }[] =
+      interactions
+        .filter((row: any) => {
+          // Parse if string
+          if (typeof row.embedding === "string") {
+            try {
+              row.embedding = JSON.parse(row.embedding);
+            } catch (e) {
+              return false;
+            }
           }
-        }
-        return Array.isArray(row.embedding) && row.embedding.length > 0;
-      })
-      .map((row: any) => ({
-        vector: row.embedding,
-        weight: row.interaction_type === 'favorite' ? 10 : 1
-      }));
+          return Array.isArray(row.embedding) && row.embedding.length > 0;
+        })
+        .map((row: any) => ({
+          vector: row.embedding,
+          weight:
+            row.interaction_type === "favorite"
+              ? 3
+              : row.interaction_type === "click"
+              ? 2
+              : 1,
+        }));
 
     if (weightedEmbeddings.length === 0) return null;
 
@@ -383,7 +504,7 @@ export class RestaurantService {
       totalWeight += weight;
     }
     if (totalWeight === 0) return null;
-    const userVector = sumVector.map(v => v / totalWeight);
+    const userVector = sumVector.map((v) => v / totalWeight);
     return userVector;
   }
-} 
+}
