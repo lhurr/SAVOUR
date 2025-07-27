@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, ActivityIndicator, ScrollView, RefreshControl } from 'react-native';
-import { Text } from '../../components/ui/Typography'; 
+import { StyleSheet, View, ActivityIndicator, ScrollView, RefreshControl, TouchableOpacity, Alert } from 'react-native';
+import { Text } from '../../components/ui/Typography';
 import { Button } from '../../components/ui/Button';
 import { supabase } from '../../lib/supabase';
 import { RestaurantService } from '../../lib/database';
 import { UserRestaurantInteraction } from '../../lib/types';
-import { colors, spacing, shadows, borderRadius } from '../../constants/theme'; 
+import { colors, spacing, shadows, borderRadius } from '../../constants/theme';
 
 interface InteractionStats {
   total_clicks: number;
@@ -27,7 +27,7 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState<InteractionStats | null>(null);
-  
+  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
 
   const [recentRestaurants, setRecentRestaurants] = useState<PaginationData>({
     data: [],
@@ -38,7 +38,7 @@ export default function Profile() {
     hasPrevPage: false
   });
   const [recentLoading, setRecentLoading] = useState(false);
-  
+
   // Favorites pagination
   const [favorites, setFavorites] = useState<PaginationData>({
     data: [],
@@ -109,6 +109,85 @@ export default function Profile() {
     setRefreshing(false);
   };
 
+  const handleDeleteInteraction = async (interactionId: string, type: 'favorite' | 'recent') => {
+    setDeleteLoading(interactionId);
+    try {
+      await RestaurantService.deleteInteraction(interactionId);
+
+      // Refresh the appropriate data
+      if (type === 'favorite') {
+        await fetchFavorites(favorites.currentPage);
+      } else {
+        await fetchRecentRestaurants(recentRestaurants.currentPage);
+      }
+
+      // Refresh stats
+      const interactionStats = await RestaurantService.getInteractionStats();
+      setStats(interactionStats);
+    } catch (error) {
+      console.error('Error deleting interaction:', error);
+      Alert.alert('Error', 'Failed to delete item. Please try again.');
+    } finally {
+      setDeleteLoading(null);
+    }
+  };
+
+  const handleDeleteAllFavorites = () => {
+    Alert.alert(
+      'Delete All Favorites',
+      'Are you sure you want to delete all your favorite restaurants? This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete All',
+          style: 'destructive',
+          onPress: async () => {
+            setDeleteLoading('all-favorites');
+            try {
+              await RestaurantService.deleteAllFavorites();
+              await fetchFavorites(1);
+              const interactionStats = await RestaurantService.getInteractionStats();
+              setStats(interactionStats);
+            } catch (error) {
+              console.error('Error deleting all favorites:', error);
+              Alert.alert('Error', 'Failed to delete favorites. Please try again.');
+            } finally {
+              setDeleteLoading(null);
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const handleDeleteAllRecentVisits = () => {
+    Alert.alert(
+      'Delete All Recent Visits',
+      'Are you sure you want to delete all your recent restaurant visits? This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete All',
+          style: 'destructive',
+          onPress: async () => {
+            setDeleteLoading('all-recent');
+            try {
+              await RestaurantService.deleteAllRecentVisits();
+              await fetchRecentRestaurants(1);
+              const interactionStats = await RestaurantService.getInteractionStats();
+              setStats(interactionStats);
+            } catch (error) {
+              console.error('Error deleting all recent visits:', error);
+              Alert.alert('Error', 'Failed to delete recent visits. Please try again.');
+            } finally {
+              setDeleteLoading(null);
+            }
+          }
+        }
+      ]
+    );
+  };
+
   useEffect(() => {
     fetchUserData();
   }, []);
@@ -122,64 +201,87 @@ export default function Profile() {
     });
   };
 
-  // StatCard: unified color, fixed size for all cards
-  const StatCard = ({ title, value, icon }: { title: string; value: number; icon: string }) => (
-    <View style={{
-      backgroundColor: colors.primary,
-      borderRadius: borderRadius.lg,
-      minHeight: 120,
-      maxHeight: 120,
-      width: 110,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginHorizontal: 4,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.10,
-      shadowRadius: 4,
-      elevation: 2,
-    }}>
-      <Text style={{ fontSize: 28, color: 'white', marginBottom: 4 }}>{icon}</Text>
-      <Text style={{ fontSize: 28, fontWeight: 'bold', color: 'white', marginBottom: 2 }}>{value}</Text>
-      <Text style={{ fontSize: 14, color: 'white', fontWeight: '600', textAlign: 'center' }}>{title}</Text>
+  // Enhanced StatCard with gradient-like effect and better design
+  const StatCard = ({ title, value, icon, gradient }: {
+    title: string;
+    value: number;
+    icon: string;
+    gradient: string[];
+  }) => (
+    <View style={[styles.statCard, { backgroundColor: gradient[0] }]}>
+      <View style={styles.statCardOverlay}>
+        <View style={styles.statIconContainer}>
+          <Text style={styles.statIcon}>{icon}</Text>
+        </View>
+        <Text style={styles.statValue}>{value.toLocaleString()}</Text>
+        <Text style={styles.statTitle}>{title}</Text>
+      </View>
     </View>
   );
 
-  const RestaurantCard = ({ interaction }: { interaction: UserRestaurantInteraction }) => (
-    <View style={styles.restaurantCard}>
-      <View style={styles.restaurantHeader}>
+  const RestaurantCard = ({
+    interaction,
+    type,
+    showDelete = true
+  }: {
+    interaction: UserRestaurantInteraction;
+    type: 'favorite' | 'recent';
+    showDelete?: boolean;
+  }) => (
+    <View style={[
+      styles.modernCard,
+      type === 'favorite' && styles.favoriteCard
+    ]}>
+      <View style={styles.cardContent}>
         <View style={styles.restaurantInfo}>
-          <Text style={styles.restaurantName}>
-            {interaction.restaurant_name}
-          </Text>
+          <View style={styles.restaurantHeader}>
+            <Text style={styles.modernRestaurantName}>
+              {type === 'favorite' ? '❤️ ' : ''}{interaction.restaurant_name}
+            </Text>
+            {showDelete && (
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={() => handleDeleteInteraction(interaction.id, type)}
+                disabled={deleteLoading === interaction.id}
+              >
+                {deleteLoading === interaction.id ? (
+                  <ActivityIndicator size="small" color="#FF3B30" />
+                ) : (
+                  <Text style={styles.deleteIcon}>✕</Text>
+                )}
+              </TouchableOpacity>
+            )}
+          </View>
+
           <View style={styles.restaurantMeta}>
             {interaction.restaurant_cuisine && (
-              <View style={styles.cuisineTag}>
-                <Text style={styles.cuisineText}>🍽️ {interaction.restaurant_cuisine}</Text>
+              <View style={styles.modernCuisineTag}>
+                <Text style={styles.modernCuisineText}>🍽️ {interaction.restaurant_cuisine}</Text>
               </View>
             )}
-            <Text style={styles.restaurantDate}>
+            <Text style={styles.modernDate}>
               {formatDate(interaction.interaction_date)}
             </Text>
           </View>
+
+          {interaction.restaurant_address && (
+            <Text style={styles.modernAddress}>
+              📍 {interaction.restaurant_address}
+            </Text>
+          )}
         </View>
       </View>
-      {interaction.restaurant_address && (
-        <Text style={styles.restaurantAddress}>
-          📍 {interaction.restaurant_address}
-        </Text>
-      )}
     </View>
   );
 
-  const PaginationControls = ({ 
-    currentPage, 
-    totalPages, 
-    hasNextPage, 
-    hasPrevPage, 
-    onNext, 
-    onPrev, 
-    loading 
+  const PaginationControls = ({
+    currentPage,
+    totalPages,
+    hasNextPage,
+    hasPrevPage,
+    onNext,
+    onPrev,
+    loading
   }: {
     currentPage: number;
     totalPages: number;
@@ -198,13 +300,13 @@ export default function Profile() {
         disabled={!hasPrevPage || loading}
         style={styles.paginationButton}
       />
-      
+
       <View style={styles.paginationInfo}>
         <Text style={styles.paginationText}>
           Page {currentPage} of {totalPages}
         </Text>
       </View>
-      
+
       <Button
         title="Next →"
         variant="outline"
@@ -218,7 +320,7 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <View style={styles.loaderContainer}> 
+      <View style={styles.loaderContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>Loading your profile...</Text>
       </View>
@@ -226,24 +328,31 @@ export default function Profile() {
   }
 
   return (
-    <ScrollView 
+    <ScrollView
       style={styles.container}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
       showsVerticalScrollIndicator={false}
     >
-      {/* Header Section */}
+      {/* Enhanced Header Section with Gradient Effect */}
       <View style={styles.headerSection}>
-        <View style={styles.profileHeader}>
-          <View style={styles.avatarContainer}>
-            <Text style={styles.avatarText}>
-              {email?.charAt(0).toUpperCase() || 'U'}
-            </Text>
-          </View>
-          <View style={styles.userInfo}>
-            <Text style={styles.userName}>Welcome back!</Text>
-            <Text style={styles.userEmail}>{email}</Text>
+        <View style={styles.headerGradientOverlay}>
+          <View style={styles.profileHeader}>
+            <View style={styles.avatarContainer}>
+              <View style={styles.avatarGlow}>
+                <Text style={styles.avatarText}>
+                  {email?.charAt(0).toUpperCase() || 'U'}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.userInfo}>
+              <Text style={styles.userName}>Welcome back! 👋</Text>
+              <Text style={styles.userEmail}>{email}</Text>
+              <View style={styles.userBadge}>
+                <Text style={styles.userBadgeText}>🌟 Food Explorer</Text>
+              </View>
+            </View>
           </View>
         </View>
       </View>
@@ -252,21 +361,24 @@ export default function Profile() {
       {stats && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Activity Overview</Text>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: spacing.md, marginBottom: spacing.md }}>
-            <StatCard 
-              title="Restaurants Clicked" 
-              value={stats.total_clicks} 
+          <View style={styles.statsContainer}>
+            <StatCard
+              title="Total Clicks"
+              value={stats.total_clicks}
               icon="👆"
+              gradient={[colors.primary, colors.primary]}
             />
-            <StatCard 
-              title="Favorites" 
-              value={stats.total_favorites} 
+            <StatCard
+              title="Favorites"
+              value={stats.total_favorites}
               icon="❤️"
+              gradient={[colors.primary, colors.primary]}
             />
-            <StatCard 
-              title="Unique Places" 
-              value={stats.unique_restaurants} 
+            <StatCard
+              title="Unique Places"
+              value={stats.unique_restaurants}
               icon="📍"
+              gradient={[colors.primary, colors.primary]}
             />
           </View>
         </View>
@@ -281,7 +393,7 @@ export default function Profile() {
               {recentRestaurants.totalCount} total visits
             </Text>
           </View>
-          
+
           {recentLoading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="small" color={colors.primary} />
@@ -290,9 +402,28 @@ export default function Profile() {
           ) : (
             <>
               {recentRestaurants.data.map((interaction) => (
-                <RestaurantCard key={interaction.id} interaction={interaction} />
+                <RestaurantCard key={interaction.id} interaction={interaction} type="recent" />
               ))}
-              
+
+              {recentRestaurants.totalCount > 0 && (
+                <View style={styles.sectionActions}>
+                  <TouchableOpacity
+                    style={styles.deleteAllButton}
+                    onPress={handleDeleteAllRecentVisits}
+                    disabled={deleteLoading === 'all-recent'}
+                  >
+                    {deleteLoading === 'all-recent' ? (
+                      <ActivityIndicator size="small" color="#FF3B30" />
+                    ) : (
+                      <>
+                        <Text style={styles.deleteAllIcon}>🗑️</Text>
+                        <Text style={styles.deleteAllText}>Clear All Recent Visits</Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              )}
+
               {recentRestaurants.totalPages > 1 && (
                 <PaginationControls
                   currentPage={recentRestaurants.currentPage}
@@ -318,7 +449,7 @@ export default function Profile() {
               {favorites.totalCount} total favorites
             </Text>
           </View>
-          
+
           {favoritesLoading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="small" color={colors.primary} />
@@ -327,32 +458,28 @@ export default function Profile() {
           ) : (
             <>
               {favorites.data.map((interaction) => (
-                <View key={interaction.id} style={[styles.restaurantCard, styles.favoriteCard]}>
-                  <View style={styles.restaurantHeader}>
-                    <View style={styles.restaurantInfo}>
-                      <Text style={styles.restaurantName}>
-                        ❤️ {interaction.restaurant_name}
-                      </Text>
-                      <View style={styles.restaurantMeta}>
-                        {interaction.restaurant_cuisine && (
-                          <View style={styles.cuisineTag}>
-                            <Text style={styles.cuisineText}>🍽️ {interaction.restaurant_cuisine}</Text>
-                          </View>
-                        )}
-                        <Text style={styles.restaurantDate}>
-                          {formatDate(interaction.interaction_date)}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                  {interaction.restaurant_address && (
-                    <Text style={styles.restaurantAddress}>
-                      📍 {interaction.restaurant_address}
-                    </Text>
-                  )}
-                </View>
+                <RestaurantCard key={interaction.id} interaction={interaction} type="favorite" />
               ))}
-              
+
+              {favorites.totalCount > 0 && (
+                <View style={styles.sectionActions}>
+                  <TouchableOpacity
+                    style={styles.deleteAllButton}
+                    onPress={handleDeleteAllFavorites}
+                    disabled={deleteLoading === 'all-favorites'}
+                  >
+                    {deleteLoading === 'all-favorites' ? (
+                      <ActivityIndicator size="small" color="#FF3B30" />
+                    ) : (
+                      <>
+                        <Text style={styles.deleteAllIcon}>🗑️</Text>
+                        <Text style={styles.deleteAllText}>Clear All Favorites</Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              )}
+
               {favorites.totalPages > 1 && (
                 <PaginationControls
                   currentPage={favorites.currentPage}
@@ -401,40 +528,78 @@ const styles = StyleSheet.create({
   },
   headerSection: {
     backgroundColor: colors.primary,
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.lg,
+    paddingTop: spacing.xl + 20,
+    paddingBottom: spacing.xl,
     paddingHorizontal: spacing.md,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  headerGradientOverlay: {
+    position: 'relative',
+    zIndex: 1,
   },
   profileHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
+    gap: spacing.lg,
   },
   avatarContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    position: 'relative',
+  },
+  avatarGlow: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    borderWidth: 3,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   avatarText: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 32,
+    fontWeight: '800',
     color: 'white',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   userInfo: {
     flex: 1,
   },
   userName: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 24,
+    fontWeight: '800',
     color: 'white',
     marginBottom: spacing.xs,
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   userEmail: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginBottom: spacing.sm,
+    fontWeight: '500',
+  },
+  userBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: 20,
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  userBadgeText: {
+    color: 'white',
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
+    fontWeight: '600',
   },
   section: {
     padding: spacing.md,
@@ -451,87 +616,76 @@ const styles = StyleSheet.create({
     color: colors.text.secondary.light,
     marginTop: spacing.xs,
   },
-  statsGrid: {
+  statsContainer: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    justifyContent: 'space-between',
     gap: spacing.sm,
+    marginBottom: spacing.md,
   },
   statCard: {
     flex: 1,
-    minWidth: '45%',
-    backgroundColor: 'white',
-    padding: spacing.md,
-    borderRadius: borderRadius.lg,
-    borderLeftWidth: 4,
-    ...shadows.sm,
+    height: 140,
+    borderRadius: 20,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
   },
-  statHeader: {
-    flexDirection: 'row',
+  statCardOverlay: {
+    flex: 1,
+    padding: spacing.lg,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: spacing.sm,
-    marginBottom: spacing.xs,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  statIconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
   },
   statIcon: {
-    fontSize: 20,
+    fontSize: 24,
   },
   statValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.text.primary.light,
+    fontSize: 28,
+    fontWeight: '800',
+    color: 'white',
+    marginBottom: spacing.xs,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
-  statLabel: {
-    fontSize: 12,
-    color: colors.text.secondary.light,
-    fontWeight: '500',
-  },
-  restaurantCard: {
-    backgroundColor: 'white',
-    padding: spacing.md,
-    borderRadius: borderRadius.lg,
-    marginBottom: spacing.sm,
-    ...shadows.sm,
+  statTitle: {
+    fontSize: 13,
+    color: 'white',
+    fontWeight: '600',
+    textAlign: 'center',
+    opacity: 0.9,
   },
   favoriteCard: {
     borderLeftWidth: 4,
     borderLeftColor: '#FF3B30',
   },
   restaurantHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: spacing.xs,
   },
   restaurantInfo: {
     gap: spacing.xs,
-  },
-  restaurantName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.text.primary.light,
   },
   restaurantMeta: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
     flexWrap: 'wrap',
-  },
-  cuisineTag: {
-    backgroundColor: '#F0F8FF',
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.round,
-  },
-  cuisineText: {
-    fontSize: 12,
-    color: '#007AFF',
-    fontWeight: '500',
-  },
-  restaurantAddress: {
-    fontSize: 14,
-    color: colors.text.secondary.light,
-    marginTop: spacing.xs,
-  },
-  restaurantDate: {
-    fontSize: 12,
-    color: colors.text.secondary.light,
-    fontStyle: 'italic',
   },
   emptyState: {
     alignItems: 'center',
@@ -592,4 +746,90 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     gap: spacing.sm,
   },
+  // Modern card styles
+  modernCard: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    marginBottom: spacing.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+  },
+  cardContent: {
+    padding: spacing.lg,
+  },
+  modernRestaurantName: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: spacing.xs,
+    flex: 1,
+  },
+  modernCuisineTag: {
+    backgroundColor: '#E8F4FD',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginRight: spacing.sm,
+  },
+  modernCuisineText: {
+    fontSize: 13,
+    color: '#0066CC',
+    fontWeight: '600',
+  },
+  modernDate: {
+    fontSize: 13,
+    color: '#666666',
+    fontWeight: '500',
+  },
+  modernAddress: {
+    fontSize: 14,
+    color: '#888888',
+    marginTop: spacing.sm,
+    lineHeight: 20,
+  },
+  deleteButton: {
+    padding: 8,
+    borderRadius: 6,
+    backgroundColor: '#F5F5F5',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deleteIcon: {
+    fontSize: 16,
+    color: '#000000',
+    fontWeight: 'bold',
+  },
+  sectionActions: {
+    marginTop: spacing.lg,
+    alignItems: 'center',
+  },
+  deleteAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF5F5',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: '#FFE5E5',
+    gap: spacing.sm,
+  },
+  deleteAllIcon: {
+    fontSize: 16,
+  },
+  deleteAllText: {
+    fontSize: 14,
+    color: '#FF3B30',
+    fontWeight: '600',
+  },
+
 });

@@ -158,7 +158,7 @@ export class RecommendationService {
       }
       
       // Sort by similarity score (descending) and then by distance (ascending)
-      return recommendations
+      const sortedRecommendations = recommendations
         .sort((a, b) => {
           if (Math.abs(a.similarityScore - b.similarityScore) < 0.01) {
             return a.distance - b.distance;
@@ -166,6 +166,13 @@ export class RecommendationService {
           return b.similarityScore - a.similarityScore;
         })
         .slice(0, limit);
+
+      // console.log('=== TOP RECOMMENDATIONS DEBUG ===');
+      // sortedRecommendations.slice(0, 5).forEach((rec, index) => {
+      //   console.log(`${index + 1}. ${rec.name} (${rec.cuisine || 'no cuisine'}) - Similarity: ${rec.similarityScore.toFixed(3)}, Distance: ${rec.distance.toFixed(0)}m`);
+      // });
+
+      return sortedRecommendations;
         
     } catch (error) {
       console.error('Error getting restaurant recommendations:', error);
