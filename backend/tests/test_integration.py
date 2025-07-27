@@ -21,7 +21,6 @@ class TestAPIIntegration:
         assert response.json() == {"message": "pong"}
 
     def test_research_topic_integration(self):
-        # Import here to avoid circular import issues
         from src.agent.utils import get_research_topic
         
         mock_messages = [HumanMessage(content="Test message")]
@@ -42,7 +41,7 @@ class TestAPIIntegration:
     def test_citation_integration(self):
         from src.agent.utils import insert_citation_markers
         
-        text = "This is a test."
+        text = "This is a test"
         citations = [{
             "start_index": 5,
             "end_index": 7,
