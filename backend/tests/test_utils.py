@@ -131,8 +131,10 @@ class TestGetCitations:
 
     def test_no_grounding_metadata(self):
         mock_response = Mock()
-        mock_response.candidates = [Mock()]
-        # No grounding_metadata attribute
+        mock_candidate = Mock()
+        # Explicitly set grounding_metadata to None to simulate no grounding metadata
+        mock_candidate.grounding_metadata = None
+        mock_response.candidates = [mock_candidate]
         
         result = get_citations(mock_response, {})
         assert result == []
