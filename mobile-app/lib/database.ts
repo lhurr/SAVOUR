@@ -397,7 +397,7 @@ export class RestaurantService {
     return { success: true };
   }
 
-  // Delete all recent visits (clicks)
+  // Delete all recent visits 
   static async deleteAllRecentVisits() {
     const { data } = await supabase.auth.getUser();
     const user = data?.user;
@@ -418,7 +418,6 @@ export class RestaurantService {
     return { success: true };
   }
 
-  // Calculate the user's taste profile vector as a weighted average of their restaurant embeddings
   static async getUserTasteProfileVector(): Promise<number[] | null> {
     const { data } = await supabase.auth.getUser();
     const user = data?.user;
@@ -465,7 +464,7 @@ export class RestaurantService {
 
     if (weightedEmbeddings.length === 0) return null;
 
-    // Calculate weighted average
+    // weighted avg w/o views now
     const vectorLength = weightedEmbeddings[0].vector.length;
     const sumVector = new Array(vectorLength).fill(0);
     let totalWeight = 0;
