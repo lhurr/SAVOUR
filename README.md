@@ -18,7 +18,7 @@
     - [Backend (AI Agent)](#backend-ai-agent)
     - [Database \& Infrastructure](#database--infrastructure)
   - [Local Setup](#local-setup)
-  - [Unit Testing](#unit-testing)
+  - [Testing](#testing)
     - [Frontend Testing](#frontend-testing)
     - [Test Configuration](#test-configuration)
 
@@ -123,7 +123,7 @@ Follow these steps to set up SAVOUR on your local machine:
 
 ---
 
-## Unit Testing
+## Testing
 
 The backend uses **pytest** with comprehensive mocking for external dependencies.
 
@@ -138,18 +138,16 @@ pip install -e ".[dev]"
 export GEMINI_API_KEY="your-api-key-here"
 
 # Run all tests
-python -m pytest tests/ -v
+python3 -m pytest tests/ -v
 
-# Run with coverage report
-python -m pytest tests/ -v --cov=src --cov-report=html --cov-report=term
 ```
 
 **Backend Test Coverage:**
 
-- FastAPI endpoints (`test_app.py`)
-- Utility functions (`test_utils.py`)
-- State management (`test_state.py`)
-- Integration tests (`test_integration.py`)
+- FastAPI endpoints 
+- Utility functions 
+- State management 
+- Integration tests 
 
 ### Frontend Testing
 
