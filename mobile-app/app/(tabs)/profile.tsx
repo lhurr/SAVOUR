@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, ActivityIndicator, ScrollView, RefreshControl, TouchableOpacity, Alert, Dimensions } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, ScrollView, RefreshControl, TouchableOpacity, Alert } from 'react-native';
 import { Text } from '../../components/ui/Typography';
 import { Button } from '../../components/ui/Button';
 import { supabase } from '../../lib/supabase';
 import { RestaurantService } from '../../lib/database';
 import { UserRestaurantInteraction } from '../../lib/types';
-import { colors, spacing, shadows, borderRadius, typography } from '../../constants/theme';
-
-const { width: screenWidth } = Dimensions.get('window');
+import { colors, spacing, shadows, borderRadius } from '../../constants/theme';
 
 interface InteractionStats {
   total_clicks: number;
@@ -670,13 +668,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     opacity: 0.9,
   },
-  restaurantCard: {
-    backgroundColor: 'white',
-    padding: spacing.md,
-    borderRadius: borderRadius.lg,
-    marginBottom: spacing.sm,
-    ...shadows.sm,
-  },
   favoriteCard: {
     borderLeftWidth: 4,
     borderLeftColor: '#FF3B30',
@@ -690,37 +681,11 @@ const styles = StyleSheet.create({
   restaurantInfo: {
     gap: spacing.xs,
   },
-  restaurantName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.text.primary.light,
-  },
   restaurantMeta: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
     flexWrap: 'wrap',
-  },
-  cuisineTag: {
-    backgroundColor: '#F0F8FF',
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.round,
-  },
-  cuisineText: {
-    fontSize: 12,
-    color: '#007AFF',
-    fontWeight: '500',
-  },
-  restaurantAddress: {
-    fontSize: 14,
-    color: colors.text.secondary.light,
-    marginTop: spacing.xs,
-  },
-  restaurantDate: {
-    fontSize: 12,
-    color: colors.text.secondary.light,
-    fontStyle: 'italic',
   },
   emptyState: {
     alignItems: 'center',
@@ -866,123 +831,5 @@ const styles = StyleSheet.create({
     color: '#FF3B30',
     fontWeight: '600',
   },
-  // Enhanced card styles
-  enhancedCard: {
-    backgroundColor: 'white',
-    borderRadius: 20,
-    marginBottom: spacing.lg,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 15,
-    elevation: 8,
-    borderWidth: 1,
-    borderColor: '#F5F5F5',
-    overflow: 'hidden',
-  },
-  favoriteCardBorder: {
-    borderWidth: 2,
-    borderColor: '#FFE5E5',
-  },
-  favoriteIndicatorBar: {
-    height: 4,
-    backgroundColor: '#FF6B6B',
-    width: '100%',
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    marginBottom: spacing.md,
-  },
-  restaurantTitleSection: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    flex: 1,
-    gap: spacing.md,
-  },
-  restaurantIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#F8F9FA',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#E9ECEF',
-  },
-  restaurantIcon: {
-    fontSize: 20,
-  },
-  restaurantDetails: {
-    flex: 1,
-    gap: spacing.xs,
-  },
-  enhancedRestaurantName: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    lineHeight: 24,
-  },
-  enhancedCuisineTag: {
-    backgroundColor: '#E8F4FD',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    alignSelf: 'flex-start',
-    borderWidth: 1,
-    borderColor: '#D1E7FF',
-  },
-  enhancedCuisineText: {
-    fontSize: 12,
-    color: '#0066CC',
-    fontWeight: '600',
-  },
-  enhancedDeleteButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#FFF5F5',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#FFE5E5',
-  },
-  enhancedDeleteIcon: {
-    fontSize: 20,
-    color: '#FF6B6B',
-    fontWeight: '600',
-  },
-  cardFooter: {
-    gap: spacing.sm,
-  },
-  addressContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.sm,
-  },
-  addressIcon: {
-    fontSize: 14,
-    marginTop: 2,
-  },
-  enhancedAddress: {
-    fontSize: 14,
-    color: '#6C757D',
-    lineHeight: 20,
-    flex: 1,
-  },
-  dateContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginTop: spacing.xs,
-  },
-  dateIcon: {
-    fontSize: 14,
-  },
-  enhancedDate: {
-    fontSize: 13,
-    color: '#ADB5BD',
-    fontWeight: '500',
-  },
+
 });
