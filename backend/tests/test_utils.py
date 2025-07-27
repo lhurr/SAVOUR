@@ -21,17 +21,17 @@ class TestGetResearchTopic:
         assert result == "No research topic provided"
 
     def test_single_message(self):
-        message = HumanMessage(content="What are the best restaurants in San Francisco?")
+        message = HumanMessage(content="What are the best restaurants in SG?")
         result = get_research_topic([message])
-        assert result == "What are the best restaurants in San Francisco?"
+        assert result == "What are the best restaurants in SG?"
 
     def test_multiple_messages(self):
         messages = [
-            HumanMessage(content="What are the best restaurants in San Francisco?"),
-            HumanMessage(content="I'm looking for Italian cuisine")
+            HumanMessage(content="What are the best restaurants in SG?"),
+            HumanMessage(content="I looking for Italian cuisine")
         ]
         result = get_research_topic(messages)
-        assert "User: What are the best restaurants in San Francisco?" in result
+        assert "User: What are the best restaurants in SG?" in result
         assert "User: I'm looking for Italian cuisine" in result
 
     def test_none_messages(self):
@@ -132,7 +132,6 @@ class TestGetCitations:
     def test_no_grounding_metadata(self):
         mock_response = Mock()
         mock_candidate = Mock()
-        # Explicitly set grounding_metadata to None to simulate no grounding metadata
         mock_candidate.grounding_metadata = None
         mock_response.candidates = [mock_candidate]
         
