@@ -25,11 +25,6 @@ async function getRestaurantSummaryFromEdge(
   );
 
   if (!response.ok) {
-    console.error(
-      "Error getting summary from Edge Function:",
-      response.status,
-      response.statusText
-    );
     throw new Error("Failed to get summary from Edge Function");
   }
 
@@ -59,7 +54,7 @@ export class RestaurantService {
       );
       embedding = await getOpenAIEmbedding(summary);
     } catch (e) {
-      console.error("Error generating summary:", e);
+      // Error generating summary - continue without embedding
     }
 
     const { data: insertedData, error } = await supabase
@@ -98,7 +93,6 @@ export class RestaurantService {
       .order("interaction_date", { ascending: false });
 
     if (error) {
-      console.error("Error fetching user interactions:", error);
       throw error;
     }
 
@@ -122,7 +116,6 @@ export class RestaurantService {
       .order("interaction_date", { ascending: false });
 
     if (error) {
-      console.error("Error fetching interactions by type:", error);
       throw error;
     }
 
@@ -145,7 +138,6 @@ export class RestaurantService {
       .limit(limit);
 
     if (error) {
-      console.error("Error fetching recent restaurants:", error);
       throw error;
     }
 
@@ -178,10 +170,6 @@ export class RestaurantService {
       .range(from, to);
 
     if (error) {
-      console.error(
-        "Error fetching recent restaurants with pagination:",
-        error
-      );
       throw error;
     }
 
@@ -227,10 +215,6 @@ export class RestaurantService {
       .range(from, to);
 
     if (error) {
-      console.error(
-        "Error fetching favorite restaurants with pagination:",
-        error
-      );
       throw error;
     }
 
@@ -350,7 +334,6 @@ export class RestaurantService {
       .eq("user_id", user.id);
 
     if (error) {
-      console.error("Error fetching interaction stats:", error);
       throw error;
     }
 
@@ -451,16 +434,6 @@ export class RestaurantService {
       .eq("user_id", user.id)
       .in("interaction_type", ["favorite", "click"]);
 
-    if (interactions && interactions.length > 0) {
-      interactions.forEach((interaction, index) => {
-        console.log(
-          `${index + 1}. ${interaction.restaurant_name} (${
-            interaction.restaurant_cuisine || "no cuisine"
-          }) - ${interaction.interaction_type}`
-        );
-      });
-    }
-
     if (error) {
       throw error;
     }
@@ -471,7 +444,6 @@ export class RestaurantService {
     const weightedEmbeddings: { vector: number[]; weight: number }[] =
       interactions
         .filter((row: any) => {
-          // Parse if string
           if (typeof row.embedding === "string") {
             try {
               row.embedding = JSON.parse(row.embedding);
