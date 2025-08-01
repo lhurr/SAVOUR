@@ -13,7 +13,7 @@
   - [About](#about)
   - [Features](#features)
   - [Demo](#demo)
-  - [Tech Stack](#tech-stack)
+  - [Technology Stack](#technology-stack)
     - [Frontend](#frontend)
     - [Backend (AI Agent)](#backend-ai-agent)
     - [Database \& Infrastructure](#database--infrastructure)
@@ -47,11 +47,26 @@ SAVOUR is here to fix that with a mobile application that utilises a powerful re
 
 ## Demo
 
-TBC
+<div align="center">
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 20px 0;">
+    <div style="text-align: center;">
+      <img src="./assets/img1.png" alt="SAVOUR App Screenshot 1" width="300" style="border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+      <p style="margin-top: 10px; font-weight: 600; color: #666;">Discover nearby restaurants</p>
+    </div>
+    <div style="text-align: center;">
+      <img src="./assets/img2.png" alt="SAVOUR App Screenshot 2" width="300" style="border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+      <p style="margin-top: 10px; font-weight: 600; color: #666;">Map Deep research agentic assistance</p>
+    </div>
+    <div style="text-align: center;">
+      <img src="./assets/img3.png" alt="SAVOUR App Screenshot 3" width="300" style="border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+      <p style="margin-top: 10px; font-weight: 600; color: #666;">Recommendations just for you</p>
+    </div>
+  </div>
+</div>
 
 ---
 
-## Tech Stack
+## Technology Stack
 
 ### Frontend
 
