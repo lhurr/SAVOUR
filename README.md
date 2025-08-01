@@ -48,19 +48,23 @@ SAVOUR is here to fix that with a mobile application that utilises a powerful re
 ## Demo
 
 <div align="center">
-  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 20px 0;">
-    <div style="text-align: center;">
-      <img src="./assets/img1.png" alt="SAVOUR App Screenshot 1" width="300" style="border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
-      <p style="margin-top: 10px; font-weight: 600; color: #666;">Discover nearby restaurants</p>
-    </div>
-    <div style="text-align: center;">
-      <img src="./assets/img2.png" alt="SAVOUR App Screenshot 2" width="300" style="border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
-      <p style="margin-top: 10px; font-weight: 600; color: #666;">Map Deep research agentic assistance</p>
-    </div>
-    <div style="text-align: center;">
-      <img src="./assets/img3.png" alt="SAVOUR App Screenshot 3" width="300" style="border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
-      <p style="margin-top: 10px; font-weight: 600; color: #666;">Recommendations just for you</p>
-    </div>
+  <div style="overflow-x: auto; margin: 20px 0;">
+    <table style="border-collapse: separate; border-spacing: 20px; margin: 0 auto;">
+      <tr>
+        <td style="text-align: center; vertical-align: top; min-width: 320px;">
+          <img src="./assets/img1.png" alt="SAVOUR App Screenshot 1" width="300" height="600" style="border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); object-fit: cover;" />
+          <p style="margin-top: 10px; font-weight: 600; color: #666;">Discover nearby restaurants</p>
+        </td>
+        <td style="text-align: center; vertical-align: top; min-width: 320px;">
+          <img src="./assets/img2.png" alt="SAVOUR App Screenshot 2" width="300" height="600" style="border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); object-fit: cover;" />
+          <p style="margin-top: 10px; font-weight: 600; color: #666;">Map Deep research agentic assistance</p>
+        </td>
+        <td style="text-align: center; vertical-align: top; min-width: 320px;">
+          <img src="./assets/img3.png" alt="SAVOUR App Screenshot 3" width="300" height="600" style="border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); object-fit: cover;" />
+          <p style="margin-top: 10px; font-weight: 600; color: #666;">Recommendations just for you</p>
+        </td>
+      </tr>
+    </table>
   </div>
 </div>
 
