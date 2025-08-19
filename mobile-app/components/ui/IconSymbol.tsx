@@ -27,7 +27,12 @@ const MAPPING = {
   'shield.fill': 'security',
   'arrow.right': 'arrow-forward',
   'arrow.left': 'arrow-back',
-  'checkmark.circle.fill': 'check-circle'
+  'checkmark.circle.fill': 'check-circle',
+  'heart': 'favorite-border',
+  'heart.fill': 'favorite',
+  'chart.bar.fill': 'bar-chart',
+  'exclamationmark.triangle.fill': 'warning',
+  'doc.text.fill': 'description'
 } as IconMapping;
 
 /**

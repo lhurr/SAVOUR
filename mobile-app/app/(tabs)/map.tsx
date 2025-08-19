@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { StyleSheet, View, ActivityIndicator, Alert, Platform, Text, Linking, Pressable, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, ActivityIndicator, Alert, Platform, Text, Linking, TouchableOpacity } from 'react-native';
 import * as Location from 'expo-location';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import { useRouter } from 'expo-router';
@@ -26,7 +26,7 @@ const AMENITY_TYPES = [
   { label: 'Pub', value: 'pub' },
 ];
 
-// https://github.com/react-native-maps/react-native-maps, RENDEER using leaflet
+// https://github.com/react-native-maps/react-native-maps, RENDER using leaflet
 export default function MapScreen() {
   const router = useRouter();
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
@@ -45,11 +45,11 @@ export default function MapScreen() {
       const response = await fetch(
         `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
       );
-      
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
-      
+
       const data = await response.json();
       const location = data.locality || data.city || data.principalSubdivision || 'Current Location';
       // console.log(data.principalSubdivision)
@@ -73,10 +73,10 @@ export default function MapScreen() {
         let currentLocation = await Location.getCurrentPositionAsync({});
         setLocation(currentLocation);
 
-        let town = 'Current Location'; 
+        let town = 'Current Location';
         try {
           town = await getTownFromCoordinates(
-            currentLocation.coords.latitude, 
+            currentLocation.coords.latitude,
             currentLocation.coords.longitude
           );
         } catch (error) {
@@ -127,8 +127,8 @@ export default function MapScreen() {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
-            <Marker 
-              position={[location.coords.latitude, location.coords.longitude]} 
+            <Marker
+              position={[location.coords.latitude, location.coords.longitude]}
               icon={userLocationIcon}
             >
               <Popup>
@@ -148,8 +148,8 @@ export default function MapScreen() {
                     {(place.address || place.town) && <span>Address: {place.address || place.town}<br /></span>}
                     {((place.cuisine || place.address || place.town) && place.website) && ''}
                     {place.website && <a href={place.website} target="_blank" rel="noopener noreferrer">Website</a>}
-                    <a 
-                      href="#" 
+                    <a
+                      href="#"
                       onClick={(e) => {
                         e.preventDefault();
                         handleInfoPress(place.name, place.address || place.town || '', place.cuisine);
@@ -225,38 +225,36 @@ export default function MapScreen() {
     }
   };
 
-  // Log a 'click' only when 'View Details' is pressed
-  const handleInfoPress = async (placeName: string, address: string, cuisine?: string) => {
-    try {
-      await RestaurantService.recordInteraction(
-        placeName,
-        address,
-        cuisine || '',
-        'click'
-      );
-    } catch (error) {
-      // Optionally handle error
-    }
+  const handleInfoPress = (placeName: string, address: string, cuisine?: string) => {
     router.push({
       pathname: '/restaurant-info',
       params: { name: placeName, address: address }
+    });
+
+    RestaurantService.recordInteraction(
+      placeName,
+      address,
+      cuisine || '',
+      'click'
+    ).catch(error => {
+      console.warn('Failed to record interaction:', error);
     });
   };
 
   const RadiusFilter = () => (
     <View style={styles.filterContainer}>
-      <TouchableOpacity 
-        style={styles.filterToggle} 
+      <TouchableOpacity
+        style={styles.filterToggle}
         onPress={() => setShowFilter(!showFilter)}
       >
         <Text style={styles.filterToggleText}>
           Radius: {radius}m {showFilter ? '▼' : '▲'}
         </Text>
       </TouchableOpacity>
-      
+
       {showFilter && (
         <View style={styles.filterOptions}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.radiusButton, radius === 500 && styles.radiusButtonActive]}
             onPress={() => setRadius(500)}
           >
@@ -264,7 +262,7 @@ export default function MapScreen() {
               500m
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.radiusButton, radius === 750 && styles.radiusButtonActive]}
             onPress={() => setRadius(750)}
           >
@@ -272,7 +270,7 @@ export default function MapScreen() {
               750m
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.radiusButton, radius === 1000 && styles.radiusButtonActive]}
             onPress={() => setRadius(1000)}
           >
@@ -281,7 +279,7 @@ export default function MapScreen() {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.radiusButton, radius === 2000 && styles.radiusButtonActive]}
             onPress={() => setRadius(2000)}
           >
@@ -296,9 +294,9 @@ export default function MapScreen() {
   );
 
   const AmenityFilter = () => (
-    <View style={[styles.filterContainer, { top: showFilter ? 210 : 60 }]}> 
-      <TouchableOpacity 
-        style={styles.filterToggle} 
+    <View style={[styles.filterContainer, { top: showFilter ? 210 : 60 }]}>
+      <TouchableOpacity
+        style={styles.filterToggle}
         onPress={() => setShowAmenityDropdown(!showAmenityDropdown)}
       >
         <Text style={styles.filterToggleText}>
@@ -308,8 +306,8 @@ export default function MapScreen() {
       {showAmenityDropdown && (
         <View style={styles.filterOptions}>
           {AMENITY_TYPES.map(type => (
-            <TouchableOpacity 
-              key={type.value} 
+            <TouchableOpacity
+              key={type.value}
               style={[styles.radiusButton, amenityFilter === type.value && styles.radiusButtonActive]}
               onPress={() => { setAmenityFilter(type.value); setShowAmenityDropdown(false); }}
             >
