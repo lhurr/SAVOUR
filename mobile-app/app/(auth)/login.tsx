@@ -26,7 +26,7 @@ export default function LoginScreen() {
         setErrorMsg(error.message);
       } else {
         setErrorMsg('');
-        router.replace('/home');
+        router.replace('/map');
       }
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'An error occurred');
